@@ -1,0 +1,9 @@
+{
+    "template": "conversation_view",
+    "description": "Adds icon to the conversation participant list.",
+    "execution_order": 10,
+    "enabled": true,
+    "action": "preg_replace",
+    "find": "/\\<xf\\:if is=\\\"\\$recipient\\.User\\\"\\>(.*)\\<\\/xf\\:if\\>/sU",
+    "replace": "<xf:include template=\"hb_convo_conversation_view_buttons\" />"
+}

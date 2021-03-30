@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Entity\\ConversationRecipient",
+    "to_class": "HappyBoard\\ConvoPlus\\XF\\Entity\\ConversationRecipient",
+    "execute_order": 10,
+    "active": true
+}
