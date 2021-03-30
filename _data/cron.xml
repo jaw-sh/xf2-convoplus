@@ -1,2 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cron/>
+<cron>
+  <entry entry_id="HBConverastionPrune" cron_class="HappyBoard\ConvoPlus\Cron\ConversationPrune" cron_method="deleteOldConversations" active="1"><![CDATA[{"day_type":"dom","dom":[-1],"hours":[2],"minutes":[30]}]]></entry>
+</cron>

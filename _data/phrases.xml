@@ -1,2 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<phrases/>
+<phrases>
+  <phrase title="cron_entry.HBConverastionPrune" version_id="0" version_string="1.0.0 Alpha"><![CDATA[Prune old conversations]]></phrase>
+</phrases>
