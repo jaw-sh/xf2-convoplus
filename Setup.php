@@ -3,6 +3,7 @@
 namespace HappyBoard\ConvoPlus;
 
 use XF\AddOn\AbstractSetup;
+use XF\Db\Schema\Alter;
 
 class Setup extends AbstractSetup
 {
