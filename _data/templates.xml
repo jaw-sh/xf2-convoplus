@@ -26,7 +26,7 @@
 
 	<xf:redirect />
 </xf:form>]]></template>
-  <template type="public" title="hb_convo_conversation_view_macros" version_id="2" version_string="2.0.0"><![CDATA[<xf:macro id="recipient" arg-recipient="!" arg-conversation="!">
+  <template type="public" title="hb_convo_conversation_view_macros" version_id="3" version_string="2.1.0"><![CDATA[<xf:macro id="recipient" arg-recipient="!" arg-conversation="!">
 	<xf:if is="$recipient.User">
 		<div class="contentRow-figure">
 			<xf:avatar user="$recipient.User" size="xs" />
@@ -61,6 +61,38 @@
 		<div class="contentRow-main">
 			{{ phrase('unknown_member') }}
 		</div>
+	</xf:if>
+</xf:macro>
+
+<xf:macro id="with_recipients" arg-visitor="!" arg-conversation="!" arg-popup="false">
+	<xf:if is="count($conversation.recipients) < 10">
+		<xf:if is="$popup">
+			<ul class="listInline listInline--selfInline listInline--comma">
+				<li><xf:username user="$conversation.Starter" defaultname="{$conversation.username}" title="{{ phrase('direct_message_starter') }}" href="" /></li><xf:trim>
+				</xf:trim><xf:foreach loop="$conversation.recipients" value="$recipient" if="{$recipient.user_id} != {$conversation.user_id}"><xf:trim>
+				<li><xf:username user="{$recipient}" defaultname="{{ phrase('unknown_member') }}" href="" /></li>
+				</xf:trim></xf:foreach>
+			</ul>
+			<xf:else />
+			<ul class="listInline listInline--comma listInline--selfInline">
+				<li><xf:username user="$conversation.Starter" defaultname="{$conversation.username}" title="{{ phrase('direct_message_starter') }}" /></li><xf:trim>
+				</xf:trim><xf:foreach loop="$conversation.recipients" value="$recipient" if="{$recipient.user_id} != {$conversation.user_id}"><xf:trim>
+				<li><xf:username user="{$recipient}" defaultname="{{ phrase('unknown_member') }}" /></li>
+				</xf:trim></xf:foreach>
+			</ul>
+		</xf:if>
+		<xf:else />
+		<xf:if is="$popup">
+			{{ phrase('hb_item1_and_x_others', {
+			'item1': username_link($conversation.Starter, false, {'defaultname': $conversation.Starter.username, 'href': false}),
+			'others': count($conversation.recipients) - 2
+			}) }}
+			<xf:else />
+			{{ phrase('hb_item1_and_x_others', {
+			'item1': username_link($conversation.Starter, false, {'defaultname': $conversation.Starter.username}),
+			'others': count($conversation.recipients) - 2
+			}) }}
+		</xf:if>
 	</xf:if>
 </xf:macro>
 

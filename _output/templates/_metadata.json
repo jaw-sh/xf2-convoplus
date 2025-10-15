@@ -10,9 +10,9 @@
         "hash": "aa76d047609bf7a04a428e5c3d95c2f0"
     },
     "public/hb_convo_conversation_view_macros.html": {
-        "version_id": 2,
-        "version_string": "2.0.0",
-        "hash": "d36b588ee1ef61eda8b917377f9a581e"
+        "version_id": 3,
+        "version_string": "2.1.0",
+        "hash": "a1b1dae35d903db0d4c794ee3ff79e42"
     },
     "public/hb_convo_kick_confirm.html": {
         "version_id": 1,

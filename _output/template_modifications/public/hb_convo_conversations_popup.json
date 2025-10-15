@@ -1,0 +1,9 @@
+{
+    "template": "conversations_popup",
+    "description": "Removes excessive user lists.",
+    "execution_order": 10,
+    "enabled": true,
+    "action": "preg_replace",
+    "find": "/<ul[^>]*listInline[^>]*>.*?<\\/ul>/s",
+    "replace": "<xf:macro id=\"hb_convo_conversation_view_macros::with_recipients\" arg-visitor=\"{$visitor}\" arg-conversation=\"{$userConv.Master}\" arg-popup=\"{{ true }}\" />"
+}

@@ -41,6 +41,12 @@
         "version_string": "2.0.0",
         "hash": "c3e5b2a9ff7883dc605422ffa7dc60c9"
     },
+    "hb_item1_and_x_others.txt": {
+        "global_cache": false,
+        "version_id": 3,
+        "version_string": "2.1.0",
+        "hash": "7b57c2e1a5fa37b236b15762ff89407b"
+    },
     "hb_kick.txt": {
         "global_cache": false,
         "version_id": 1,

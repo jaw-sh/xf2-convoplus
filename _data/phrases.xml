@@ -7,6 +7,7 @@
   <phrase title="hb_convo_lives_until_x" version_id="1" version_string="1.1.0"><![CDATA[Autodeletes {lifespan}]]></phrase>
   <phrase title="hb_direct_message_awake" version_id="2" version_string="2.0.0"><![CDATA[Awake to new messages in this chain.]]></phrase>
   <phrase title="hb_direct_message_sleeping" version_id="2" version_string="2.0.0"><![CDATA[Sleeping on new direct messages.]]></phrase>
+  <phrase title="hb_item1_and_x_others" version_id="3" version_string="2.1.0"><![CDATA[{item1} and {others} others]]></phrase>
   <phrase title="hb_kick" version_id="1" version_string="1.1.0"><![CDATA[Kick]]></phrase>
   <phrase title="hb_please_confirm_that_you_want_to_kick" version_id="1" version_string="1.1.0"><![CDATA[Please confirm that you want to kick this user from this conversation]]></phrase>
   <phrase title="hb_please_confirm_that_you_wish_to_sleep_the_following_direct_message" version_id="2" version_string="2.0.0"><![CDATA[Please confirm that you wish to sleep the following direct message]]></phrase>
