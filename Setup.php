@@ -28,7 +28,7 @@ class Setup extends AbstractSetup
     public function upgrade(array $stepParams = [])
     {
         if ($this->addOn->version_id < 2) {
-            $this->schemaManager()->createTable('xf_conversation_message', function (Create $table) {
+            $this->schemaManager()->alterTable('xf_conversation_message', function (Create $table) {
                 $table->addColumn('hb_system_message', 'tinyint')->setDefault(0);
             });
 
