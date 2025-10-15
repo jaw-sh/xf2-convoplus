@@ -5,5 +5,5 @@
     "enabled": true,
     "action": "preg_replace",
     "find": "/<xf:if\\s+is=\"\\$report\\.link\">([\\s\\S]*?)<\\/xf:if>/",
-    "replace": "<xf:if is=\"$report.link\">\n\t$2\n<xf:elseif is=\"{$report.content_type}=='conversation_message'\" />\n\t<xf:macro id=\"hb_convo_report_macros::join_conversation\" arg-report=\"{$report}\" />\n</xf:if>\n"
+    "replace": "<xf:if is=\"$report.link\">\n\t$1\n<xf:elseif is=\"{$report.content_type}=='conversation_message'\" />\n\t<xf:macro id=\"hb_convo_report_macros::join_conversation\" arg-report=\"{$report}\" />\n</xf:if>\n"
 }
