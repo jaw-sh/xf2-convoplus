@@ -11,6 +11,9 @@
     "XF-Entity-ConversationUser_HappyBoard-ConvoPlus-XF-Entity-ConversationUser.json": {
         "hash": "49b1687328a880c0a33b4632dcf0054b"
     },
+    "XF-Finder-ConversationRecipientFinder_HappyBoard-ConvoPlus-XF-Finder-ConversationRecipientFinder.json": {
+        "hash": "c7d0fd6bfd77289f5ec07ed70944c723"
+    },
     "XF-Pub-Controller-ConversationController_HappyBoard-ConvoPlus-XF-Pub-Controller-ConversationController.json": {
         "hash": "636fe5444b2da51579ed992b5f7ffe82"
     },

@@ -4,6 +4,7 @@ namespace HappyBoard\ConvoPlus\XF\Pub\Controller;
 
 use XF\Entity\ConversationRecipient;
 use XF\Mvc\ParameterBag;
+use XF\Finder\ConversationRecipientFinder;
 
 class ConversationController extends XFCP_ConversationController
 {
@@ -76,6 +77,48 @@ class ConversationController extends XFCP_ConversationController
 			];
 			return $this->view('HappyBoard\ConvoPlus:Conversation\Kick', 'hb_convo_kick_confirm', $viewParams);
 		}
+	}
+
+	public function actionRejoin(ParameterBag $params)
+	{
+		$visitor = \XF::visitor();
+		//$conversation = $this->assertViewableConversation($params->conversation_id);
+
+		/** @var ConversationUserFinder $finder */
+		$finder = $this->finder(ConversationRecipientFinder::class);
+		$finder->forUser($visitor, true);
+		$finder->where('conversation_id', $params->conversation_id);
+		$finder->with('Conversation');
+
+		/** @var ConversationUser $conversation */
+		$recipient = $finder->fetchOne();
+		if (!$recipient || !$recipient->Conversation)
+		{
+			throw $this->exception($this->notFound(\XF::phrase('requested_direct_message_not_found')));
+		}
+
+		$conversation = $recipient->Conversation;
+
+		// Check if the current user was kicked from this conversation
+		if ($recipient && isset($recipient->hb_kicked_by) && $recipient->hb_kicked_by) {
+			return $this->noPermission(\XF::phrase('hb_cannot_rejoin_kicked_conversation'));
+		}
+
+		// Check if user was previously a recipient
+		$recipient = $this->em()->findOne('XF:ConversationRecipient', [
+			'conversation_id' => $conversation->conversation_id,
+			'user_id' => $visitor->user_id
+		]);
+		
+		if (!$recipient || $recipient->recipient_state !== 'deleted_ignored') {
+			return $this->noPermission();
+		}
+		
+		// Rejoin the conversation by setting recipient state to active
+		$recipient->recipient_state = 'active';
+		$recipient->save();
+		
+		return $this->redirect($this->buildLink('conversations', $conversation));
 	}
 
 	public function actionSleep(ParameterBag $params)

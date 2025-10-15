@@ -5,6 +5,12 @@
         "version_string": "1.0.0 Alpha",
         "hash": "d6a1ee5779eb3a54b59df04e26ae491f"
     },
+    "hb_cannot_rejoin_kicked_conversation.txt": {
+        "global_cache": false,
+        "version_id": 3,
+        "version_string": "2.1.0",
+        "hash": "ba339eb1554ad7620bfbcb11be898017"
+    },
     "hb_convo_force_join.txt": {
         "global_cache": false,
         "version_id": 2,

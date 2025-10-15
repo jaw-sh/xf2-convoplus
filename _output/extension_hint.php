@@ -16,6 +16,11 @@ namespace HappyBoard\ConvoPlus\XF\Entity
 	class XFCP_ConversationUser extends \XF\Entity\ConversationUser {}
 }
 
+namespace HappyBoard\ConvoPlus\XF\Finder
+{
+	class XFCP_ConversationRecipientFinder extends \XF\Finder\ConversationRecipientFinder {}
+}
+
 namespace HappyBoard\ConvoPlus\XF\Pub\Controller
 {
 	class XFCP_ConversationController extends \XF\Pub\Controller\ConversationController {}
