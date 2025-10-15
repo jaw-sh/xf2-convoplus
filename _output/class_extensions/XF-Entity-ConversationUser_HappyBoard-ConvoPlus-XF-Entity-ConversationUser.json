@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Entity\\ConversationUser",
+    "to_class": "HappyBoard\\ConvoPlus\\XF\\Entity\\ConversationUser",
+    "execute_order": 10,
+    "active": true
+}

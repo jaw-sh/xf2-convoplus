@@ -1,25 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates>
-  <template type="public" title="hb_convo_conversation_view_buttons" version_id="0" version_string="1.0.0 Alpha"><![CDATA[<xf:if is="$recipient.User">
-	<div class="contentRow-figure">
-		<xf:avatar user="$recipient.User" size="xs" />
+  <template type="public" title="alert_user_conversation_kicked" version_id="2" version_string="2.0.0"><![CDATA[{{ phrase('hb_x_kicked_you_from_direct_message_y', {
+	'name': username_link($user, false, {'defaultname': $alert.username}),
+	'title': '<em>' . $extra.conversation_title . '</em>'
+}) }}]]></template>
+  <template type="public" title="hb_conversation_sleep" version_id="2" version_string="2.0.0"><![CDATA[<xf:title>{{ $isSleeping ? phrase('hb_wake') : phrase('hb_sleep') }}</xf:title>
+
+<xf:breadcrumb href="{{ link('direct-messages') }}">{{ phrase('direct_messages') }}</xf:breadcrumb>
+<xf:breadcrumb href="{{ link('direct-messages', $conversation) }}">{$conversation.title}</xf:breadcrumb>
+
+<xf:form action="{{ link('direct-messages/sleep', $userConv) }}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				<xf:if is="$isSleeping">
+					{{ phrase('hb_please_confirm_that_you_wish_to_wake_the_following_direct_message:') }}
+				<xf:else />
+					{{ phrase('hb_please_confirm_that_you_wish_to_sleep_the_following_direct_message:') }}
+				</xf:if>
+				<strong><a href="{{ link('direct-messages', $conversation) }}">{$conversation.title}</a></strong>
+			</xf:inforow>
+		</div>
+		<xf:submitrow submit="{{ $isSleeping ? phrase('hb_wake') : phrase('hb_sleep') }}" rowtype="simple" />
 	</div>
-	<div class="contentRow-main">
-		<xf:username user="$recipient.User" rich="true" />
-		<xf:if is="{{$recipient.User.user_id == $conversation.user_id}}">
-			<xf:fa icon="fa-crown" data-xf-init="tooltip" title="{{ phrase('conversation_starter')|for_attr }}" />
+
+	<xf:redirect />
+</xf:form>]]></template>
+  <template type="public" title="hb_convo_conversation_view_macros" version_id="2" version_string="2.0.0"><![CDATA[<xf:macro id="recipient" arg-recipient="!" arg-conversation="!">
+	<xf:if is="$recipient.User">
+		<div class="contentRow-figure">
+			<xf:avatar user="$recipient.User" size="xs" />
+		</div>
+		<div class="contentRow-main">
+			<xf:username user="$recipient.User" rich="true" />
+			<xf:if is="{{$recipient.User.user_id == $conversation.user_id}}">
+				<xf:fa icon="fa-crown" data-xf-init="tooltip" title="{{ phrase('conversation_starter')|for_attr }}" />
+			</xf:if>
+
+			<xf:if contentcheck="true">
+				<div class="contentRow-minor">
+					<xf:contentcheck>
+						<xf:if is="{$recipient.hb_kicked_by} AND {$recipient.user_id} != {$conversation.user_id}">
+							{{ phrase('hb_convo_kicked_by_x', {'user': '<a href="' . link('members', $recipient.KickedBy) . '">' . $recipient.KickedBy.username . '</a>' }) }}
+							<xf:elseif is="{$recipient.hb_invited_by} AND {$recipient.user_id} != {$conversation.user_id}" />
+							{{ phrase('hb_convo_invited_by_x', {'user': '<a href="' . link('members', $recipient.InvitedBy) . '">' . $recipient.InvitedBy.username . '</a>' }) }}
+						</xf:if>
+					</xf:contentcheck>
+				</div>
+			</xf:if>
+		</div>
+
+		<xf:if is="$recipient.canKick()">
+			<span class="contentRow-extra"><a href="{{ link('direct-messages/kick', $conversation, {'user_id': $recipient.user_id}) }}">{{ phrase('hb_kick') }}</a></span>
 		</xf:if>
-		<div class="contentRow-minor"><xf:usertitle user="$recipient.User" /></div>
-		<xf:if is="{$recipient.hb_invited_by} AND {$recipient.user_id} != {$conversation.user_id}">
-			<div class="contentRow-minor">Invited by {$recipient.InvitedBy.username}</div>
-		</xf:if>
+
+		<xf:else />
+		<div class="contentRow-figure">
+			<xf:avatar user="{{ null }}" size="xs" />
+		</div>
+		<div class="contentRow-main">
+			{{ phrase('unknown_member') }}
+		</div>
+	</xf:if>
+</xf:macro>
+
+<xf:macro id="sleep_button" arg-conversation="!" arg-userConv="!">
+	<xf:button href="{{ link('direct-messages/sleep', $conversation) }}" class="button--link"
+			   data-xf-click="switch"
+			   data-sk-sleep="{{ phrase('hb_sleep') }}"
+			   data-sk-wake="{{ phrase('hb_wake') }}">
+		{{ {$userConv.hb_sleeping} ? phrase('hb_wake') : phrase('hb_sleep') }}
+	</xf:button>
+</xf:macro>]]></template>
+  <template type="public" title="hb_convo_kick_confirm" version_id="1" version_string="1.1.0"><![CDATA[<xf:title>{{ phrase('confirm_action') }}</xf:title>
+
+<xf:form action="{$confirmUrl}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				{{ phrase('hb_please_confirm_that_you_want_to_kick:') }}
+				<xf:if is="$userUrl">
+					<strong><a href="{$userUrl}">{$userName}</a></strong>
+				<xf:else />
+					<strong>{$userName}</strong>
+				</xf:if>
+				<xf:if is="$contentUrl">
+					<strong><a href="{$contentUrl}">{$contentTitle}</a></strong>
+				<xf:else />
+					<strong>{$contentTitle}</strong>
+				</xf:if>
+			</xf:inforow>
+		</div>
+		<xf:submitrow icon="confirm" rowtype="simple" />
 	</div>
-	<xf:else />
-	<div class="contentRow-figure">
-		<xf:avatar user="{{ null }}" size="xs" />
+</xf:form>]]></template>
+  <template type="public" title="hb_convo_report_macros" version_id="2" version_string="2.0.0"><![CDATA[<xf:macro id="join_conversation" arg-report="!">
+	<div class="block-footer">
+		<span class="block-footer-controls"><xf:button href="{{ link('reports/go-to-content', $report) }}">{{ phrase('hb_convo_force_join') }}</xf:button></span>
 	</div>
-	<div class="contentRow-main">
-		{{ phrase('unknown_member') }}
-	</div>
-</xf:if>]]></template>
+</xf:macro>]]></template>
 </templates>

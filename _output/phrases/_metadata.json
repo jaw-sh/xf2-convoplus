@@ -4,5 +4,83 @@
         "version_id": 0,
         "version_string": "1.0.0 Alpha",
         "hash": "d6a1ee5779eb3a54b59df04e26ae491f"
+    },
+    "hb_convo_force_join.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "65d81a46abb55b405ec5bdd2d50135a1"
+    },
+    "hb_convo_invited_by_x.txt": {
+        "global_cache": false,
+        "version_id": 1,
+        "version_string": "1.1.0",
+        "hash": "9bb61790472ddfdb51448f5114291123"
+    },
+    "hb_convo_kicked_by_x.txt": {
+        "global_cache": false,
+        "version_id": 1,
+        "version_string": "1.1.0",
+        "hash": "5576de1f8514e0a1e30c3099285355ef"
+    },
+    "hb_convo_lives_until_x.txt": {
+        "global_cache": false,
+        "version_id": 1,
+        "version_string": "1.1.0",
+        "hash": "48878bd89f9c1413f700e108bbe53592"
+    },
+    "hb_direct_message_awake.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "04ff08978e016cb14b9f46785b5eccf9"
+    },
+    "hb_direct_message_sleeping.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "c3e5b2a9ff7883dc605422ffa7dc60c9"
+    },
+    "hb_kick.txt": {
+        "global_cache": false,
+        "version_id": 1,
+        "version_string": "1.1.0",
+        "hash": "3e07960fcc45408894cf1402257bd9fd"
+    },
+    "hb_please_confirm_that_you_want_to_kick.txt": {
+        "global_cache": false,
+        "version_id": 1,
+        "version_string": "1.1.0",
+        "hash": "3dd0ade21c5cb3dca913e147d428b512"
+    },
+    "hb_please_confirm_that_you_wish_to_sleep_the_following_direct_message.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "78ab8b0654bea6dea1843e6a34a40ccb"
+    },
+    "hb_please_confirm_that_you_wish_to_wake_the_following_direct_message.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "f2bb261f91a498492daa03469adfb8c7"
+    },
+    "hb_sleep.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "243924bfd56a682be235638b53961e09"
+    },
+    "hb_wake.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "688761c83ec62d30ec1fe269849d42ad"
+    },
+    "hb_x_kicked_you_from_direct_message_y.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "d003eb6e7f2a95db0a161c5c77d5cabc"
     }
 }

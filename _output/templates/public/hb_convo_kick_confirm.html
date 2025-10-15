@@ -1,0 +1,22 @@
+<xf:title>{{ phrase('confirm_action') }}</xf:title>
+
+<xf:form action="{$confirmUrl}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				{{ phrase('hb_please_confirm_that_you_want_to_kick:') }}
+				<xf:if is="$userUrl">
+					<strong><a href="{$userUrl}">{$userName}</a></strong>
+				<xf:else />
+					<strong>{$userName}</strong>
+				</xf:if>
+				<xf:if is="$contentUrl">
+					<strong><a href="{$contentUrl}">{$contentTitle}</a></strong>
+				<xf:else />
+					<strong>{$contentTitle}</strong>
+				</xf:if>
+			</xf:inforow>
+		</div>
+		<xf:submitrow icon="confirm" rowtype="simple" />
+	</div>
+</xf:form>

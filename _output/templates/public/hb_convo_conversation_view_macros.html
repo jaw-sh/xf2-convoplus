@@ -1,0 +1,46 @@
+<xf:macro id="recipient" arg-recipient="!" arg-conversation="!">
+	<xf:if is="$recipient.User">
+		<div class="contentRow-figure">
+			<xf:avatar user="$recipient.User" size="xs" />
+		</div>
+		<div class="contentRow-main">
+			<xf:username user="$recipient.User" rich="true" />
+			<xf:if is="{{$recipient.User.user_id == $conversation.user_id}}">
+				<xf:fa icon="fa-crown" data-xf-init="tooltip" title="{{ phrase('conversation_starter')|for_attr }}" />
+			</xf:if>
+
+			<xf:if contentcheck="true">
+				<div class="contentRow-minor">
+					<xf:contentcheck>
+						<xf:if is="{$recipient.hb_kicked_by} AND {$recipient.user_id} != {$conversation.user_id}">
+							{{ phrase('hb_convo_kicked_by_x', {'user': '<a href="' . link('members', $recipient.KickedBy) . '">' . $recipient.KickedBy.username . '</a>' }) }}
+							<xf:elseif is="{$recipient.hb_invited_by} AND {$recipient.user_id} != {$conversation.user_id}" />
+							{{ phrase('hb_convo_invited_by_x', {'user': '<a href="' . link('members', $recipient.InvitedBy) . '">' . $recipient.InvitedBy.username . '</a>' }) }}
+						</xf:if>
+					</xf:contentcheck>
+				</div>
+			</xf:if>
+		</div>
+
+		<xf:if is="$recipient.canKick()">
+			<span class="contentRow-extra"><a href="{{ link('direct-messages/kick', $conversation, {'user_id': $recipient.user_id}) }}">{{ phrase('hb_kick') }}</a></span>
+		</xf:if>
+
+		<xf:else />
+		<div class="contentRow-figure">
+			<xf:avatar user="{{ null }}" size="xs" />
+		</div>
+		<div class="contentRow-main">
+			{{ phrase('unknown_member') }}
+		</div>
+	</xf:if>
+</xf:macro>
+
+<xf:macro id="sleep_button" arg-conversation="!" arg-userConv="!">
+	<xf:button href="{{ link('direct-messages/sleep', $conversation) }}" class="button--link"
+			   data-xf-click="switch"
+			   data-sk-sleep="{{ phrase('hb_sleep') }}"
+			   data-sk-wake="{{ phrase('hb_wake') }}">
+		{{ {$userConv.hb_sleeping} ? phrase('hb_wake') : phrase('hb_sleep') }}
+	</xf:button>
+</xf:macro>

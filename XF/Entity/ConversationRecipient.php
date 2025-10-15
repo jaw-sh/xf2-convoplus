@@ -7,6 +7,53 @@ use XF\Mvc\Entity\Structure;
 
 class ConversationRecipient extends XFCP_ConversationRecipient
 {
+	public function canKick(&$error = null)
+	{
+		$visitor = \XF::visitor();
+
+        if (!$visitor->user_id)
+        {
+            $error = \XF::phraseDeferred('you_must_be_logged_in');
+            return false;
+        }
+
+        // Check if visitor has permission to kick in this conversation
+        if (!$this->Conversation->canKickRecipients())
+        {
+            $error = \XF::phraseDeferred('you_do_not_have_permission_to_kick_users');
+            return false;
+        }
+
+        // Can't kick staff members
+        if ($this->User->is_staff)
+        {
+            $error = \XF::phraseDeferred('you_cannot_kick_staff_members');
+            return false;
+        }
+
+        // Can't kick yourself
+        if ($this->user_id == $visitor->user_id)
+        {
+            $error = \XF::phraseDeferred('you_cannot_kick_yourself');
+            return false;
+        }
+
+        // Can't kick the conversation owner
+        if ($this->Conversation->user_id == $this->user_id)
+        {
+            $error = \XF::phraseDeferred('you_cannot_kick_the_conversation_owner');
+            return false;
+        }
+
+        // Can't kick if recipient is already deleted/kicked
+        if ($this->recipient_state !== 'active')
+        {
+            $error = \XF::phraseDeferred('this_user_is_not_an_active_participant');
+            return false;
+        }
+        return true;
+	}
+
     public static function getStructure(Structure $structure)
     {
         $structure = parent::getStructure($structure);

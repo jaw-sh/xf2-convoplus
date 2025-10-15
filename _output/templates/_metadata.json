@@ -1,7 +1,27 @@
 {
-    "public/hb_convo_conversation_view_buttons.html": {
-        "version_id": 0,
-        "version_string": "1.0.0 Alpha",
-        "hash": "bc169036f610544c785c4af698ee6004"
+    "public/alert_user_conversation_kicked.html": {
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "fc00480693dee8d1af9c0397387dab34"
+    },
+    "public/hb_conversation_sleep.html": {
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "aa76d047609bf7a04a428e5c3d95c2f0"
+    },
+    "public/hb_convo_conversation_view_macros.html": {
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "d36b588ee1ef61eda8b917377f9a581e"
+    },
+    "public/hb_convo_kick_confirm.html": {
+        "version_id": 1,
+        "version_string": "1.1.0",
+        "hash": "b88301a1f9c9ce2e7101644d31c7948e"
+    },
+    "public/hb_convo_report_macros.html": {
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "ac20977ccb113b5fe68dfe1f90a9eae2"
     }
 }

@@ -5,5 +5,5 @@
     "enabled": true,
     "action": "preg_replace",
     "find": "/\\<xf\\:if is=\\\"\\$recipient\\.User\\\"\\>(.*)\\<\\/xf\\:if\\>/sU",
-    "replace": "<xf:include template=\"hb_convo_conversation_view_buttons\" />"
+    "replace": "<xf:macro id=\"hb_convo_conversation_view_macros::recipient\" arg-conversation=\"{$conversation}\" arg-recipient=\"{$recipient}\" />"
 }

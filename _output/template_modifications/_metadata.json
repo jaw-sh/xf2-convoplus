@@ -1,5 +1,14 @@
 {
+    "public/hb_convo_conversation_list_macros.json": {
+        "hash": "e5fea1c2609907d118054ebacc4b9760"
+    },
     "public/hb_convo_conversation_view.json": {
-        "hash": "569f4a15285e1c92e32d2050e996dedc"
+        "hash": "f76043c0bac6428774e59272ba2c5d55"
+    },
+    "public/hb_convo_conversation_view_sleep_button.json": {
+        "hash": "be4374f46767df8112b82bc470fd23b1"
+    },
+    "public/hb_convo_report_view.json": {
+        "hash": "5b0931e90911581ec8478e2a0e0d8fb5"
     }
 }

@@ -1,0 +1,9 @@
+{
+    "template": "conversation_list_macros",
+    "description": "Adds the autodeletion timer to the list.",
+    "execution_order": 10,
+    "enabled": true,
+    "action": "str_replace",
+    "find": "<li class=\"structItem-startDate\"><a href=\"{{ link('direct-messages', $userConv) }}\" rel=\"nofollow\"><xf:date time=\"{$userConv.Master.start_date}\" /></a></li>",
+    "replace": "$0\n<li class=\"structItem-cutoffDate\">{{ phrase('hb_convo_lives_until_x', {'lifespan': date($userConv->Master->getLifespan()) }) }}</li>"
+}

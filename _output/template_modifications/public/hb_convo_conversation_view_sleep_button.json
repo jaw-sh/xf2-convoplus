@@ -1,0 +1,9 @@
+{
+    "template": "conversation_view",
+    "description": "Inserts the sleep/wake button.",
+    "execution_order": 10,
+    "enabled": true,
+    "action": "str_replace",
+    "find": "<xf:button href=\"{{ link('direct-messages/mark-unread'",
+    "replace": "<xf:macro id=\"hb_convo_conversation_view_macros::sleep_button\" arg-conversation=\"{$conversation}\" arg-userConv=\"{$userConv}\" />\n\n$0"
+}

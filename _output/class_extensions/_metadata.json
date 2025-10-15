@@ -1,6 +1,21 @@
 {
+    "XF-Entity-ConversationMaster_HappyBoard-ConvoPlus-XF-Entity-ConversationMaster.json": {
+        "hash": "a9415d0daa405d8dce168e7d3bc53671"
+    },
+    "XF-Entity-ConversationMessage_HappyBoard-ConvoPlus-XF-Entity-ConversationMessage.json": {
+        "hash": "624be5cbe7b29ac8f3cea1f7109cc6f5"
+    },
     "XF-Entity-ConversationRecipient_HappyBoard-ConvoPlus-XF-Entity-ConversationRecipient.json": {
         "hash": "f484ec269dc13882b2af2f86599237c8"
+    },
+    "XF-Entity-ConversationUser_HappyBoard-ConvoPlus-XF-Entity-ConversationUser.json": {
+        "hash": "49b1687328a880c0a33b4632dcf0054b"
+    },
+    "XF-Pub-Controller-ConversationController_HappyBoard-ConvoPlus-XF-Pub-Controller-ConversationController.json": {
+        "hash": "636fe5444b2da51579ed992b5f7ffe82"
+    },
+    "XF-Pub-Controller-ReportController_HappyBoard-ConvoPlus-XF-Pub-Controller-ReportController.json": {
+        "hash": "00183f52360d192ce7e7dd30d64bf36a"
     },
     "XF-Repository-Conversation_HappyBoard-ConvoPlus-XF-Repository-Conversation.json": {
         "hash": "fa27c73423af6e03f6bcacba9ede5654"

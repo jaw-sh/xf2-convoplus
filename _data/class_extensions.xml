@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <class_extensions>
+  <extension from_class="XF\Entity\ConversationMaster" to_class="HappyBoard\ConvoPlus\XF\Entity\ConversationMaster" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\ConversationMessage" to_class="HappyBoard\ConvoPlus\XF\Entity\ConversationMessage" execute_order="10" active="1"/>
   <extension from_class="XF\Entity\ConversationRecipient" to_class="HappyBoard\ConvoPlus\XF\Entity\ConversationRecipient" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\ConversationUser" to_class="HappyBoard\ConvoPlus\XF\Entity\ConversationUser" execute_order="10" active="1"/>
+  <extension from_class="XF\Pub\Controller\ConversationController" to_class="HappyBoard\ConvoPlus\XF\Pub\Controller\ConversationController" execute_order="10" active="1"/>
+  <extension from_class="XF\Pub\Controller\ReportController" to_class="HappyBoard\ConvoPlus\XF\Pub\Controller\ReportController" execute_order="10" active="1"/>
   <extension from_class="XF\Repository\Conversation" to_class="HappyBoard\ConvoPlus\XF\Repository\Conversation" execute_order="10" active="1"/>
 </class_extensions>

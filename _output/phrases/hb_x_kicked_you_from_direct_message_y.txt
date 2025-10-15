@@ -1,0 +1,1 @@
+{name} kicked you from the direct message chain {title}.

@@ -1,7 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <template_modifications>
+  <modification type="public" template="conversation_list_macros" modification_key="hb_convo_conversation_list_macros" description="Adds the autodeletion timer to the list." execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<li class="structItem-startDate"><a href="{{ link('direct-messages', $userConv) }}" rel="nofollow"><xf:date time="{$userConv.Master.start_date}" /></a></li>]]></find>
+    <replace><![CDATA[$0
+<li class="structItem-cutoffDate">{{ phrase('hb_convo_lives_until_x', {'lifespan': date($userConv->Master->getLifespan()) }) }}</li>]]></replace>
+  </modification>
   <modification type="public" template="conversation_view" modification_key="hb_convo_conversation_view" description="Adds icon to the conversation participant list." execution_order="10" enabled="1" action="preg_replace">
     <find><![CDATA[/\<xf\:if is=\"\$recipient\.User\"\>(.*)\<\/xf\:if\>/sU]]></find>
-    <replace><![CDATA[<xf:include template="hb_convo_conversation_view_buttons" />]]></replace>
+    <replace><![CDATA[<xf:macro id="hb_convo_conversation_view_macros::recipient" arg-conversation="{$conversation}" arg-recipient="{$recipient}" />]]></replace>
+  </modification>
+  <modification type="public" template="conversation_view" modification_key="hb_convo_conversation_view_sleep_button" description="Inserts the sleep/wake button." execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<xf:button href="{{ link('direct-messages/mark-unread']]></find>
+    <replace><![CDATA[<xf:macro id="hb_convo_conversation_view_macros::sleep_button" arg-conversation="{$conversation}" arg-userConv="{$userConv}" />
+
+$0]]></replace>
+  </modification>
+  <modification type="public" template="report_view" modification_key="hb_convo_report_view" description="Adds a force-join button for DMs." execution_order="10" enabled="1" action="preg_replace">
+    <find><![CDATA[/<xf:if\s+is="\$report\.link">([\s\S]*?)<\/xf:if>/]]></find>
+    <replace><![CDATA[<xf:if is="$report.link">
+	$2
+<xf:elseif is="{$report.content_type}=='conversation_message'" />
+	<xf:macro id="hb_convo_report_macros::join_conversation" arg-report="{$report}" />
+</xf:if>
+]]></replace>
   </modification>
 </template_modifications>

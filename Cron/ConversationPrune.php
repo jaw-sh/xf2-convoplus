@@ -9,12 +9,14 @@ use XF;
  */
 class ConversationPrune
 {
+    public const CONVERSATION_CUTOFF = 60 * 60 * 24 * 30; // 30 days
+
     /**
      * Deletes expired bans.
      */
     public static function deleteOldConversations()
     {
-        $cutOff = time() - (30 * 24 * 60 * 60);
+        $cutOff = time() - self::CONVERSATION_CUTOFF;
 
         /** @var \XF\Finder\ConversationMaster $finder */
         $finder = XF::app()->finder('XF:ConversationMaster');

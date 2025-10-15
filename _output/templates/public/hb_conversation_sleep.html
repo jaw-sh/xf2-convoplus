@@ -1,0 +1,22 @@
+<xf:title>{{ $isSleeping ? phrase('hb_wake') : phrase('hb_sleep') }}</xf:title>
+
+<xf:breadcrumb href="{{ link('direct-messages') }}">{{ phrase('direct_messages') }}</xf:breadcrumb>
+<xf:breadcrumb href="{{ link('direct-messages', $conversation) }}">{$conversation.title}</xf:breadcrumb>
+
+<xf:form action="{{ link('direct-messages/sleep', $userConv) }}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				<xf:if is="$isSleeping">
+					{{ phrase('hb_please_confirm_that_you_wish_to_wake_the_following_direct_message:') }}
+				<xf:else />
+					{{ phrase('hb_please_confirm_that_you_wish_to_sleep_the_following_direct_message:') }}
+				</xf:if>
+				<strong><a href="{{ link('direct-messages', $conversation) }}">{$conversation.title}</a></strong>
+			</xf:inforow>
+		</div>
+		<xf:submitrow submit="{{ $isSleeping ? phrase('hb_wake') : phrase('hb_sleep') }}" rowtype="simple" />
+	</div>
+
+	<xf:redirect />
+</xf:form>
