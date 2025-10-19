@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates>
+  <template type="public" title="alert_conversation_message_mention" version_id="4" version_string="2.2.0"><![CDATA[{{ phrase('x_mentioned_you_in_message_in_direct_message_y', {
+	'name': username_link($user, false, {'defaultname': $alert.username}),
+	'title': '<a href="' . link('direct-messages/replies', $content) . '" class="fauxBlockLink-blockLink">' . $content.Conversation.title . '</a>'
+}) }}]]></template>
   <template type="public" title="alert_conversation_message_quote" version_id="3" version_string="2.1.0"><![CDATA[{{ phrase('x_quoted_your_message_in_direct_message_y', {
 	'name': username_link($user, false, {'defaultname': $alert.username}),
 	'title': '<a href="' . link('direct-messages/replies', $content) . '" class="fauxBlockLink-blockLink">' . $content.Conversation.title . '</a>'

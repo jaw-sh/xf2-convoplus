@@ -1,4 +1,9 @@
 {
+    "public/alert_conversation_message_mention.html": {
+        "version_id": 4,
+        "version_string": "2.2.0",
+        "hash": "6b99547ba3abba80766f21c42b48b0ae"
+    },
     "public/alert_conversation_message_quote.html": {
         "version_id": 3,
         "version_string": "2.1.0",
