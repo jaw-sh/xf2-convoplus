@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Service\\Conversation\\ReplierService",
+    "to_class": "HappyBoard\\ConvoPlus\\XF\\Service\\Conversation\\ReplierService",
+    "execute_order": 10,
+    "active": true
+}

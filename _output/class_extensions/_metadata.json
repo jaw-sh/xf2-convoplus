@@ -1,4 +1,7 @@
 {
+    "XF-Alert-ConversationMessageHandler_HappyBoard-ConvoPlus-XF-Alert-ConversationMessageHandler.json": {
+        "hash": "e23631fb41abdaca9ebdf7af75ddd14b"
+    },
     "XF-Entity-ConversationMaster_HappyBoard-ConvoPlus-XF-Entity-ConversationMaster.json": {
         "hash": "a9415d0daa405d8dce168e7d3bc53671"
     },
@@ -22,5 +25,14 @@
     },
     "XF-Repository-Conversation_HappyBoard-ConvoPlus-XF-Repository-Conversation.json": {
         "hash": "fa27c73423af6e03f6bcacba9ede5654"
+    },
+    "XF-Service-Conversation-MessageManagerService_HappyBoard-ConvoPlus-XF-Service-Conversation-MessageManagerService.json": {
+        "hash": "50eebe1e11975c96d66bf564c87ea3c5"
+    },
+    "XF-Service-Conversation-NotifierService_HappyBoard-ConvoPlus-XF-Service-Conversation-NotifierService.json": {
+        "hash": "9aad151268c87c92a0efd082e1f33f5c"
+    },
+    "XF-Service-Conversation-ReplierService_HappyBoard-ConvoPlus-XF-Service-Conversation-ReplierService.json": {
+        "hash": "3b16441a22809bbe13b0dd9201788737"
     }
 }

@@ -1,4 +1,9 @@
 {
+    "public/alert_conversation_message_quote.html": {
+        "version_id": 3,
+        "version_string": "2.1.0",
+        "hash": "dc10c6da56f9cb4625376ba954ccbee3"
+    },
     "public/alert_user_conversation_kicked.html": {
         "version_id": 2,
         "version_string": "2.0.0",

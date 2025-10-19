@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Service\\Conversation\\MessageManagerService",
+    "to_class": "HappyBoard\\ConvoPlus\\XF\\Service\\Conversation\\MessageManagerService",
+    "execute_order": 10,
+    "active": true
+}

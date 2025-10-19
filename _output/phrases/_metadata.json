@@ -1,4 +1,16 @@
 {
+    "alert_opt_out.conversation_message_mention.txt": {
+        "global_cache": false,
+        "version_id": 3,
+        "version_string": "2.1.0",
+        "hash": "14775914bc21689ed263de35bb43192a"
+    },
+    "alert_opt_out.conversation_message_quote.txt": {
+        "global_cache": false,
+        "version_id": 3,
+        "version_string": "2.1.0",
+        "hash": "aa0e4d009baadf2a2071b0a2808f21da"
+    },
     "cron_entry.HBConverastionPrune.txt": {
         "global_cache": false,
         "version_id": 0,
@@ -94,5 +106,17 @@
         "version_id": 2,
         "version_string": "2.0.0",
         "hash": "d003eb6e7f2a95db0a161c5c77d5cabc"
+    },
+    "x_mentioned_you_in_message_in_direct_message_y.txt": {
+        "global_cache": false,
+        "version_id": 3,
+        "version_string": "2.1.0",
+        "hash": "392318482cc719d080e13c4e23fdd1e0"
+    },
+    "x_quoted_your_message_in_direct_message_y.txt": {
+        "global_cache": false,
+        "version_id": 3,
+        "version_string": "2.1.0",
+        "hash": "c464950ee202c03aebc1a7a3550fb6fc"
     }
 }

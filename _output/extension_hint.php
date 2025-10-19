@@ -8,6 +8,11 @@
  * @noinspection PhpMultipleClassesDeclarationsInOneFile
  */
 
+namespace HappyBoard\ConvoPlus\XF\Alert
+{
+	class XFCP_ConversationMessageHandler extends \XF\Alert\ConversationMessageHandler {}
+}
+
 namespace HappyBoard\ConvoPlus\XF\Entity
 {
 	class XFCP_ConversationMaster extends \XF\Entity\ConversationMaster {}
@@ -30,4 +35,11 @@ namespace HappyBoard\ConvoPlus\XF\Pub\Controller
 namespace HappyBoard\ConvoPlus\XF\Repository
 {
 	class XFCP_Conversation extends \XF\Repository\Conversation {}
+}
+
+namespace HappyBoard\ConvoPlus\XF\Service\Conversation
+{
+	class XFCP_MessageManagerService extends \XF\Service\Conversation\MessageManagerService {}
+	class XFCP_NotifierService extends \XF\Service\Conversation\NotifierService {}
+	class XFCP_ReplierService extends \XF\Service\Conversation\ReplierService {}
 }

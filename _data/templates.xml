@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates>
+  <template type="public" title="alert_conversation_message_quote" version_id="3" version_string="2.1.0"><![CDATA[{{ phrase('x_quoted_your_message_in_direct_message_y', {
+	'name': username_link($user, false, {'defaultname': $alert.username}),
+	'title': '<a href="' . link('direct-messages/replies', $content) . '" class="fauxBlockLink-blockLink">' . $content.Conversation.title . '</a>'
+}) }}]]></template>
   <template type="public" title="alert_user_conversation_kicked" version_id="2" version_string="2.0.0"><![CDATA[{{ phrase('hb_x_kicked_you_from_direct_message_y', {
 	'name': username_link($user, false, {'defaultname': $alert.username}),
 	'title': '<em>' . $extra.conversation_title . '</em>'

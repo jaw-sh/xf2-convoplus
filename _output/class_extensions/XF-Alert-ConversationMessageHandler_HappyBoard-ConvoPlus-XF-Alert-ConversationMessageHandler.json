@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Alert\\ConversationMessageHandler",
+    "to_class": "HappyBoard\\ConvoPlus\\XF\\Alert\\ConversationMessageHandler",
+    "execute_order": 10,
+    "active": true
+}

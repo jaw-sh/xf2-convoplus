@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <phrases>
+  <phrase title="alert_opt_out.conversation_message_mention" version_id="3" version_string="2.1.0"><![CDATA[Mentions you in a direct message]]></phrase>
+  <phrase title="alert_opt_out.conversation_message_quote" version_id="3" version_string="2.1.0"><![CDATA[
+Quotes your message in a direct message]]></phrase>
   <phrase title="cron_entry.HBConverastionPrune" version_id="0" version_string="1.0.0 Alpha"><![CDATA[Prune old conversations]]></phrase>
   <phrase title="hb_cannot_rejoin_kicked_conversation" version_id="3" version_string="2.1.0"><![CDATA[You are not permitted to rejoin this conversation because you were kicked from it.]]></phrase>
   <phrase title="hb_convo_force_join" version_id="2" version_string="2.0.0"><![CDATA[Join Conversation]]></phrase>
@@ -16,4 +19,6 @@
   <phrase title="hb_sleep" version_id="2" version_string="2.0.0"><![CDATA[Sleep]]></phrase>
   <phrase title="hb_wake" version_id="2" version_string="2.0.0"><![CDATA[Wake]]></phrase>
   <phrase title="hb_x_kicked_you_from_direct_message_y" version_id="2" version_string="2.0.0"><![CDATA[{name} kicked you from the direct message chain {title}.]]></phrase>
+  <phrase title="x_mentioned_you_in_message_in_direct_message_y" version_id="3" version_string="2.1.0"><![CDATA[{name} mentioned you in a message in the direct message {title}.]]></phrase>
+  <phrase title="x_quoted_your_message_in_direct_message_y" version_id="3" version_string="2.1.0"><![CDATA[{name} quoted your message in the direct message {title}.]]></phrase>
 </phrases>
