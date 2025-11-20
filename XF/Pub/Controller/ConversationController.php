@@ -62,6 +62,39 @@ class ConversationController extends XFCP_ConversationController
 		return (bool)$messageFinder->fetchOne();
 	}
 
+	public function actionAddReply(ParameterBag $params)
+	{
+		$conversationId = intval($params->conversation_id);
+		if (!$conversationId)
+		{
+			return $this->notFound();
+		}
+
+		$userConv = $this->assertViewableUserConversation($conversationId);
+		$conversation = $userConv->Master;
+		if (!$conversation || !$conversation->exists())
+		{
+			return $this->notFound();
+		}
+
+		// Rebuild stats if conversation metadata is stale to prevent core errors
+		if (!$conversation->FirstMessage || !$conversation->LastMessage)
+		{
+			/** @var \HappyBoard\ConvoPlus\XF\Repository\Conversation $conversationRepo */
+			$conversationRepo = $this->repository('XF:Conversation');
+			$conversationRepo->rebuildConversationMessageStats($conversation);
+			
+			// Re-fetch to get updated data
+			$conversation = $this->em()->find('XF:ConversationMaster', $conversationId);
+			if (!$conversation)
+			{
+				return $this->notFound();
+			}
+		}
+
+		return parent::actionAddReply($params);
+	}
+
 	public function actionKick(ParameterBag $params)
 	{
 		$userConv = $this->assertViewableUserConversation($params->conversation_id);
