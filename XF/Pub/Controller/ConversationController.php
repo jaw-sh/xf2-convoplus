@@ -11,26 +11,37 @@ class ConversationController extends XFCP_ConversationController
 {
 	public function actionView(ParameterBag $params)
 	{
-		// Add defensive checks before calling parent
-		$userConv = $this->getUserConversationOrNull($params->conversation_id);
-		
-		if (!$userConv || !$userConv->Master)
+		// Pre-validate conversation exists to avoid errors in parent
+		$conversationId = intval($params->conversation_id);
+		if (!$conversationId)
 		{
 			return $this->notFound();
 		}
 		
-		// Verify the conversation has valid data
-		$conversation = $userConv->Master;
-		if (!$conversation || !$conversation->exists())
-		{
-			return $this->notFound();
-		}
+		$visitor = \XF::visitor();
 		
-		// Check if user was kicked and shouldn't be able to view
-		if ($userConv->recipient_state === 'deleted_ignored' && 
-			isset($userConv->hb_kicked_by) && $userConv->hb_kicked_by)
+		// Check if a conversation user record exists
+		$userConv = $this->em()->find('XF:ConversationUser', [
+			'conversation_id' => $conversationId,
+			'owner_user_id' => $visitor->user_id
+		]);
+		
+		// If no user conversation record, let parent handle it normally
+		if ($userConv)
 		{
-			return $this->noPermission(\XF::phrase('hb_cannot_view_kicked_conversation'));
+			// Check if user was kicked and shouldn't be able to view
+			if ($userConv->recipient_state === 'deleted_ignored' && 
+				isset($userConv->hb_kicked_by) && $userConv->hb_kicked_by)
+			{
+				return $this->noPermission(\XF::phrase('hb_cannot_view_kicked_conversation'));
+			}
+			
+			// Verify the conversation master exists
+			$conversation = $userConv->Master;
+			if (!$conversation || !$conversation->exists())
+			{
+				return $this->notFound();
+			}
 		}
 		
 		return parent::actionView($params);
