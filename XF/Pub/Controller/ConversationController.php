@@ -9,6 +9,33 @@ use XF\Repository\UserAlertRepository;
 
 class ConversationController extends XFCP_ConversationController
 {
+	public function actionView(ParameterBag $params)
+	{
+		// Add defensive checks before calling parent
+		$userConv = $this->getUserConversationOrNull($params->conversation_id);
+		
+		if (!$userConv || !$userConv->Master)
+		{
+			return $this->notFound();
+		}
+		
+		// Verify the conversation has valid data
+		$conversation = $userConv->Master;
+		if (!$conversation || !$conversation->exists())
+		{
+			return $this->notFound();
+		}
+		
+		// Check if user was kicked and shouldn't be able to view
+		if ($userConv->recipient_state === 'deleted_ignored' && 
+			isset($userConv->hb_kicked_by) && $userConv->hb_kicked_by)
+		{
+			return $this->noPermission(\XF::phrase('hb_cannot_view_kicked_conversation'));
+		}
+		
+		return parent::actionView($params);
+	}
+
 	public function actionKick(ParameterBag $params)
 	{
 		$userConv = $this->assertViewableUserConversation($params->conversation_id);

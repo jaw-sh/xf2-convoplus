@@ -9,6 +9,8 @@ class ConversationUser extends XFCP_ConversationUser
 {
 	protected function _preSave()
     {
+        parent::_preSave();
+        
         if ($this->hb_sleeping)
         {
             $this->is_unread = false;
