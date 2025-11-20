@@ -92,15 +92,13 @@ class Conversation extends XFCP_Conversation
     {
         $visibleFinder = $this->finder('XF:ConversationMessage');
         $visibleFinder
-            ->where('conversation_id', $conversation->conversation_id)
-            ->where('message_state', 'visible');
+            ->where('conversation_id', $conversation->conversation_id);
 
         $totalVisible = $visibleFinder->total();
 
         $lastMessageFinder = $this->finder('XF:ConversationMessage');
         $lastMessage = $lastMessageFinder
             ->where('conversation_id', $conversation->conversation_id)
-            ->where('message_state', 'visible')
             ->order('message_date', 'DESC')
             ->order('message_id', 'DESC')
             ->fetchOne();

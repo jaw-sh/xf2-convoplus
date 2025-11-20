@@ -56,7 +56,6 @@ class ConversationController extends XFCP_ConversationController
 		$messageFinder = $this->finder('XF:ConversationMessage');
 		$messageFinder
 			->where('conversation_id', $conversation->conversation_id)
-			->where('message_state', 'visible')
 			->order('message_date')
 			->limit(1, $offset);
 
