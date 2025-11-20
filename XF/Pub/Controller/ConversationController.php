@@ -5,6 +5,7 @@ namespace HappyBoard\ConvoPlus\XF\Pub\Controller;
 use XF\Entity\ConversationRecipient;
 use XF\Mvc\ParameterBag;
 use XF\Finder\ConversationRecipientFinder;
+use XF\Repository\UserAlertRepository;
 
 class ConversationController extends XFCP_ConversationController
 {
@@ -30,6 +31,9 @@ class ConversationController extends XFCP_ConversationController
 		{
 			return $this->notFound();
 		}
+
+		// Hydrate the conversation relation since we already have it
+		$recipient->hydrateRelation('Conversation', $conversation);
 
 		// Check if the current user can kick this recipient
 		if (!$recipient->canKick($error))

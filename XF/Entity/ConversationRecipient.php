@@ -17,15 +17,30 @@ class ConversationRecipient extends XFCP_ConversationRecipient
             return false;
         }
 
+        // Get conversation - either from relation or Master
+        $conversation = $this->Conversation ?: $this->Master;
+        if (!$conversation)
+        {
+            $error = \XF::phraseDeferred('requested_conversation_not_found');
+            return false;
+        }
+
         // Check if visitor has permission to kick in this conversation
-        if (!$this->Conversation->canKickRecipients())
+        if (!$conversation->canKickRecipients())
         {
             $error = \XF::phraseDeferred('you_do_not_have_permission_to_kick_users');
             return false;
         }
 
         // Can't kick staff members
-        if ($this->User->is_staff)
+        $user = $this->User;
+        if (!$user)
+        {
+            $error = \XF::phraseDeferred('requested_user_not_found');
+            return false;
+        }
+
+        if ($user->is_staff)
         {
             $error = \XF::phraseDeferred('you_cannot_kick_staff_members');
             return false;
@@ -39,7 +54,7 @@ class ConversationRecipient extends XFCP_ConversationRecipient
         }
 
         // Can't kick the conversation owner
-        if ($this->Conversation->user_id == $this->user_id)
+        if ($conversation->user_id == $this->user_id)
         {
             $error = \XF::phraseDeferred('you_cannot_kick_the_conversation_owner');
             return false;
