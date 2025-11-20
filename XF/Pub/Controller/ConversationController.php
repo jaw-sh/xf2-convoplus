@@ -28,7 +28,7 @@ class ConversationController extends XFCP_ConversationController
 		}
 
 		$visitor = \XF::visitor();
-		$recipient = $conversation->getRecipient($visitor->user_id);
+		$recipient = $conversation->Recipients[$visitor->user_id] ?? null;
 		if ($recipient && $recipient->recipient_state === 'deleted_ignored' &&
 			isset($recipient->hb_kicked_by) && $recipient->hb_kicked_by)
 		{
