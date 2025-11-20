@@ -35,6 +35,23 @@ class ConversationController extends XFCP_ConversationController
 			return $this->noPermission(\XF::phrase('hb_cannot_view_kicked_conversation'));
 		}
 
+		// Validate conversation has proper message metadata before proceeding
+		if (!$conversation->FirstMessage || !$conversation->LastMessage)
+		{
+			/** @var \HappyBoard\ConvoPlus\XF\Repository\Conversation $conversationRepo */
+			$conversationRepo = $this->repository('XF:Conversation');
+			$conversationRepo->rebuildConversationMessageStats($conversation);
+			
+			// Reload to get updated data
+			$conversation = $this->em()->find('XF:ConversationMaster', $conversationId);
+			$userConv->hydrateRelation('Master', $conversation);
+			
+			if (!$conversation || !$conversation->FirstMessage)
+			{
+				return $this->notFound();
+			}
+		}
+
 		// Always validate page has messages to prevent core errors
 		if (!$this->doesConversationPageHaveMessages($conversation, $page, $perPage))
 		{
