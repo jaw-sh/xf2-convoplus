@@ -20,22 +20,27 @@ class ConversationController extends XFCP_ConversationController
 		
 		$visitor = \XF::visitor();
 		
-		// Check if a conversation user record exists
+		// Check if a conversation recipient record exists (has kick data)
+		$recipient = $this->em()->find('XF:ConversationRecipient', [
+			'conversation_id' => $conversationId,
+			'user_id' => $visitor->user_id
+		]);
+		
+		// Check if user was kicked and shouldn't be able to view
+		if ($recipient && $recipient->recipient_state === 'deleted_ignored' && 
+			isset($recipient->hb_kicked_by) && $recipient->hb_kicked_by)
+		{
+			return $this->noPermission(\XF::phrase('hb_cannot_view_kicked_conversation'));
+		}
+		
+		// Also check the conversation user record exists and has a valid master
 		$userConv = $this->em()->find('XF:ConversationUser', [
 			'conversation_id' => $conversationId,
 			'owner_user_id' => $visitor->user_id
 		]);
 		
-		// If no user conversation record, let parent handle it normally
 		if ($userConv)
 		{
-			// Check if user was kicked and shouldn't be able to view
-			if ($userConv->recipient_state === 'deleted_ignored' && 
-				isset($userConv->hb_kicked_by) && $userConv->hb_kicked_by)
-			{
-				return $this->noPermission(\XF::phrase('hb_cannot_view_kicked_conversation'));
-			}
-			
 			// Verify the conversation master exists
 			$conversation = $userConv->Master;
 			if (!$conversation || !$conversation->exists())
