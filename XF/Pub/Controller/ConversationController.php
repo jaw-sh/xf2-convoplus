@@ -101,9 +101,11 @@ class ConversationController extends XFCP_ConversationController
 			$conversationRepo = $this->repository('XF:Conversation');
 			$conversationRepo->rebuildConversationMessageStats($conversation);
 			
-			// Re-fetch to get updated data
-			$conversation = $this->em()->find('XF:ConversationMaster', $conversationId);
-			if (!$conversation)
+			// Re-fetch to get updated data and re-hydrate the userConv relation
+			$conversation = $this->em()->find('XF:ConversationMaster', $conversationId, ['FirstMessage', 'LastMessage']);
+			$userConv->hydrateRelation('Master', $conversation);
+			
+			if (!$conversation || !$conversation->FirstMessage)
 			{
 				return $this->notFound();
 			}
