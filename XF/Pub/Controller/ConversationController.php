@@ -11,45 +11,55 @@ class ConversationController extends XFCP_ConversationController
 {
 	public function actionView(ParameterBag $params)
 	{
-		// Pre-validate conversation exists to avoid errors in parent
 		$conversationId = intval($params->conversation_id);
 		if (!$conversationId)
 		{
 			return $this->notFound();
 		}
-		
+
+		$page = max(1, $this->filterPage());
+		$perPage = max(1, (int)$this->options()->messagesPerPage);
+
+		$userConv = $this->assertViewableUserConversation($conversationId);
+		$conversation = $userConv->Master;
+		if (!$conversation || !$conversation->exists())
+		{
+			return $this->notFound();
+		}
+
 		$visitor = \XF::visitor();
-		
-		// Check if a conversation recipient record exists (has kick data)
-		$recipient = $this->em()->find('XF:ConversationRecipient', [
-			'conversation_id' => $conversationId,
-			'user_id' => $visitor->user_id
-		]);
-		
-		// Check if user was kicked and shouldn't be able to view
-		if ($recipient && $recipient->recipient_state === 'deleted_ignored' && 
+		$recipient = $conversation->getRecipient($visitor->user_id);
+		if ($recipient && $recipient->recipient_state === 'deleted_ignored' &&
 			isset($recipient->hb_kicked_by) && $recipient->hb_kicked_by)
 		{
 			return $this->noPermission(\XF::phrase('hb_cannot_view_kicked_conversation'));
 		}
-		
-		// Also check the conversation user record exists and has a valid master
-		$userConv = $this->em()->find('XF:ConversationUser', [
-			'conversation_id' => $conversationId,
-			'owner_user_id' => $visitor->user_id
-		]);
-		
-		if ($userConv)
+
+		if ($page > 1 && !$this->doesConversationPageHaveMessages($conversation, $page, $perPage))
 		{
-			// Verify the conversation master exists
-			$conversation = $userConv->Master;
-			if (!$conversation || !$conversation->exists())
-			{
-				return $this->notFound();
-			}
+			/** @var \HappyBoard\ConvoPlus\XF\Repository\Conversation $conversationRepo */
+			$conversationRepo = $this->repository('XF:Conversation');
+			$stats = $conversationRepo->rebuildConversationMessageStats($conversation);
+			$lastPage = max(1, (int)($stats['lastPage'] ?? 1));
+
+			$params = $lastPage > 1 ? ['page' => $lastPage] : [];
+			return $this->redirect($this->buildLink('direct-messages', $conversation, $params));
 		}
-		
+
 		return parent::actionView($params);
+	}
+
+	protected function doesConversationPageHaveMessages(\XF\Entity\ConversationMaster $conversation, int $page, int $perPage): bool
+	{
+		$offset = max(0, ($page - 1) * $perPage);
+		$messageFinder = $this->finder('XF:ConversationMessage');
+		$messageFinder
+			->where('conversation_id', $conversation->conversation_id)
+			->where('message_state', 'visible')
+			->order('message_date')
+			->limit($offset, 1);
+
+		return (bool)$messageFinder->fetchOne();
 	}
 
 	public function actionKick(ParameterBag $params)

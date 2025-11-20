@@ -87,4 +87,49 @@ class Conversation extends XFCP_Conversation
 
         return $insertedActiveUsers;
     }
+
+    public function rebuildConversationMessageStats(ConversationMaster $conversation): array
+    {
+        $visibleFinder = $this->finder('XF:ConversationMessage');
+        $visibleFinder
+            ->where('conversation_id', $conversation->conversation_id)
+            ->where('message_state', 'visible');
+
+        $totalVisible = $visibleFinder->total();
+
+        $lastMessageFinder = $this->finder('XF:ConversationMessage');
+        $lastMessage = $lastMessageFinder
+            ->where('conversation_id', $conversation->conversation_id)
+            ->where('message_state', 'visible')
+            ->order('message_date', 'DESC')
+            ->order('message_id', 'DESC')
+            ->fetchOne();
+
+        if ($lastMessage)
+        {
+            $conversation->last_message_id = $lastMessage->message_id;
+            $conversation->last_message_date = $lastMessage->message_date;
+            $conversation->last_message_user_id = $lastMessage->user_id;
+            $conversation->last_message_username = $lastMessage->username;
+        }
+        else if ($conversation->FirstMessage)
+        {
+            $conversation->last_message_id = $conversation->first_message_id;
+            $conversation->last_message_date = $conversation->start_date;
+            $conversation->last_message_user_id = $conversation->user_id;
+            $conversation->last_message_username = $conversation->username;
+            $totalVisible = max($totalVisible, 1);
+        }
+
+        $conversation->reply_count = max(0, $totalVisible - 1);
+        $conversation->saveIfChanged();
+
+        $perPage = max(1, (int)\XF::options()->messagesPerPage);
+        $lastPage = max(1, (int)ceil(max(1, $totalVisible) / $perPage));
+
+        return [
+            'total' => $totalVisible,
+            'lastPage' => $lastPage
+        ];
+    }
 }
