@@ -35,15 +35,16 @@ class ConversationController extends XFCP_ConversationController
 			return $this->noPermission(\XF::phrase('hb_cannot_view_kicked_conversation'));
 		}
 
-		if ($page > 1 && !$this->doesConversationPageHaveMessages($conversation, $page, $perPage))
+		// Always validate page has messages to prevent core errors
+		if (!$this->doesConversationPageHaveMessages($conversation, $page, $perPage))
 		{
 			/** @var \HappyBoard\ConvoPlus\XF\Repository\Conversation $conversationRepo */
 			$conversationRepo = $this->repository('XF:Conversation');
 			$stats = $conversationRepo->rebuildConversationMessageStats($conversation);
 			$lastPage = max(1, (int)($stats['lastPage'] ?? 1));
 
-			$params = $lastPage > 1 ? ['page' => $lastPage] : [];
-			return $this->redirect($this->buildLink('direct-messages', $conversation, $params));
+			$linkParams = $lastPage > 1 ? ['page' => $lastPage] : [];
+			return $this->redirect($this->buildLink('direct-messages', $conversation, $linkParams));
 		}
 
 		return parent::actionView($params);
@@ -51,13 +52,13 @@ class ConversationController extends XFCP_ConversationController
 
 	protected function doesConversationPageHaveMessages(\XF\Entity\ConversationMaster $conversation, int $page, int $perPage): bool
 	{
-		$offset = max(0, ($page - 1) * $perPage);
+		$offset = ($page - 1) * $perPage;
 		$messageFinder = $this->finder('XF:ConversationMessage');
 		$messageFinder
 			->where('conversation_id', $conversation->conversation_id)
 			->where('message_state', 'visible')
 			->order('message_date')
-			->limit($offset, 1);
+			->limit(1, $offset);
 
 		return (bool)$messageFinder->fetchOne();
 	}
