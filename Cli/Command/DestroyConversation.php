@@ -41,7 +41,29 @@ class DestroyConversation extends Command
             $db = XF::db();
             $db->beginTransaction();
 
+            $isNcmecActive = \XF::isAddOnActive('USIPS/NCMEC');
+
             foreach ($finder->fetch(10) AS $conversation) {
+                // 18 U.S. Code § 2703
+                if ($isNcmecActive)
+                {
+                    $shouldPreserve = false;
+                    foreach ($conversation->Recipients as $recipient)
+                    {
+                        if (\XF::repository('USIPS\NCMEC:Preservation')->isUserPreserved($recipient->user_id))
+                        {
+                            $shouldPreserve = true;
+                            break;
+                        }
+                    }
+                    
+                    if ($shouldPreserve)
+                    {
+                        $output->writeln("Skipping conversation {$conversation->conversation_id} due to 18 U.S. Code § 2703 preservation hold.");
+                        continue;
+                    }
+                }
+
                 $conversation->delete(false, false);
             }
 
