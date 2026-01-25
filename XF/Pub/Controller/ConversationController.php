@@ -5,6 +5,7 @@ namespace HappyBoard\ConvoPlus\XF\Pub\Controller;
 use XF\Entity\ConversationRecipient;
 use XF\Mvc\ParameterBag;
 use XF\Finder\ConversationRecipientFinder;
+use XF\Repository\AttachmentRepository;
 use XF\Repository\UserAlertRepository;
 
 class ConversationController extends XFCP_ConversationController
@@ -79,8 +80,14 @@ class ConversationController extends XFCP_ConversationController
 		return (bool)$messageFinder->fetchOne();
 	}
 
+	/**
+	 * Override parent to fix bug where $messages->last() returns false on empty collection.
+	 * Also rebuilds conversation stats if metadata is stale.
+	 */
 	public function actionAddReply(ParameterBag $params)
 	{
+		$this->assertPostOnly();
+
 		$conversationId = intval($params->conversation_id);
 		if (!$conversationId)
 		{
@@ -89,29 +96,99 @@ class ConversationController extends XFCP_ConversationController
 
 		$userConv = $this->assertViewableUserConversation($conversationId);
 		$conversation = $userConv->Master;
+
 		if (!$conversation || !$conversation->exists())
 		{
 			return $this->notFound();
 		}
 
-		// Rebuild stats if conversation metadata is stale to prevent core errors
+		// Rebuild stats if conversation metadata is stale to prevent errors
 		if (!$conversation->FirstMessage || !$conversation->LastMessage)
 		{
 			/** @var \HappyBoard\ConvoPlus\XF\Repository\Conversation $conversationRepo */
 			$conversationRepo = $this->repository('XF:Conversation');
 			$conversationRepo->rebuildConversationMessageStats($conversation);
-			
-			// Re-fetch to get updated data and re-hydrate the userConv relation
+
+			// Re-fetch to get updated data
 			$conversation = $this->em()->find('XF:ConversationMaster', $conversationId, ['FirstMessage', 'LastMessage']);
 			$userConv->hydrateRelation('Master', $conversation);
-			
+
 			if (!$conversation || !$conversation->FirstMessage)
 			{
 				return $this->notFound();
 			}
 		}
 
-		return parent::actionAddReply($params);
+		if (!$conversation->canReply())
+		{
+			return $this->noPermission();
+		}
+
+		$replier = $this->setupConversationReply($conversation, $userConv);
+		if (!$replier->validate($errors))
+		{
+			return $this->error($errors);
+		}
+		$this->assertNotFlooding('conversation_message');
+		$message = $replier->save();
+
+		$this->afterConversationReply($replier);
+
+		if ($this->filter('_xfWithData', 'bool') && $this->request->exists('last_date') && $message->canView())
+		{
+			$convMessageRepo = $this->getConversationMessageRepo();
+
+			$limit = 3;
+			$lastDate = $this->filter('last_date', 'uint');
+
+			$messageList = $convMessageRepo->findNewestMessagesInConversation($conversation, $lastDate)->limit($limit + 1);
+			$messages = $messageList->fetch();
+
+			// We fetched one more post than needed, if more than $limit posts were returned,
+			// we can show the 'there are more posts' notice
+			if ($messages->count() > $limit)
+			{
+				$firstUnshownMessage = $messages->first();
+				$messages = $messages->pop();
+			}
+			else
+			{
+				$firstUnshownMessage = null;
+			}
+
+			// Put the posts into oldest-first order
+			$messages = $messages->reverse(true);
+
+			/** @var AttachmentRepository $attachmentRepo */
+			$attachmentRepo = $this->repository(AttachmentRepository::class);
+			$attachmentRepo->addAttachmentsToContent($messages, 'conversation_message');
+
+			$viewParams = [
+				'conversation' => $conversation,
+				'messages' => $messages,
+				'firstUnshownMessage' => $firstUnshownMessage,
+			];
+			$view = $this->view('XF:Conversation\NewMessages', 'conversation_reply_new_messages', $viewParams);
+
+			// Fix: Check if messages collection is not empty before accessing last()
+			// This can happen if last_date is stale or there's a timing issue
+			$lastMessage = $messages->last();
+			if ($lastMessage)
+			{
+				$view->setJsonParam('lastDate', $lastMessage->message_date);
+			}
+			else
+			{
+				// Fallback to the newly created message's date
+				$view->setJsonParam('lastDate', $message->message_date);
+			}
+
+			return $view;
+		}
+		else
+		{
+			return $this->redirect($this->buildLink('direct-messages/replies', $message));
+		}
 	}
 
 	public function actionKick(ParameterBag $params)
