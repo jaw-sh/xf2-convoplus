@@ -2,7 +2,7 @@
     "template": "conversation_view",
     "description": "Adds icon to the conversation participant list.",
     "execution_order": 10,
-    "enabled": true,
+    "enabled": false,
     "action": "preg_replace",
     "find": "/\\<xf\\:if is=\\\"\\$recipient\\.User\\\"\\>(.*)\\<\\/xf\\:if\\>/sU",
     "replace": "<xf:macro id=\"hb_convo_conversation_view_macros::recipient\" arg-conversation=\"{$conversation}\" arg-recipient=\"{$recipient}\" />"

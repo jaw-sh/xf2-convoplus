@@ -1,0 +1,9 @@
+{
+    "template": "conversation_view",
+    "description": "Replaces participant list with collapsible macro for large conversations.",
+    "execution_order": 10,
+    "enabled": true,
+    "action": "preg_replace",
+    "find": "/<ol class=\"block-body\">\\s*<xf:foreach loop=\"\\$recipients\".*?<\\/xf:foreach>\\s*<\\/ol>/s",
+    "replace": "<xf:macro id=\"hb_convo_conversation_view_macros::participant_list\" arg-conversation=\"{$conversation}\" arg-recipients=\"{$recipients}\" />"
+}

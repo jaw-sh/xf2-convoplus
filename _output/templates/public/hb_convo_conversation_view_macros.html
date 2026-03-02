@@ -36,6 +36,48 @@
 	</xf:if>
 </xf:macro>
 
+<xf:macro id="participant_list" arg-conversation="!" arg-recipients="!">
+	<!-- Starter always visible at top -->
+	<ol class="block-body">
+		<xf:foreach loop="$recipients" value="$recipient" if="$recipient.user_id == $conversation.user_id">
+			<li class="block-row">
+				<div class="contentRow">
+					<xf:macro name="recipient" arg-recipient="{$recipient}" arg-conversation="{$conversation}" />
+				</div>
+			</li>
+		</xf:foreach>
+	</ol>
+
+	<xf:if is="count($recipients) > 10">
+		<!-- Collapsible for large participant lists -->
+		<h4 class="block-minorHeader">
+			<span class="collapseTrigger collapseTrigger--block" data-xf-click="toggle" data-target="< :up :next">
+				{{ phrase('hb_convo_x_other_participants', {'count': count($recipients) - 1}) }}
+			</span>
+		</h4>
+		<ol class="block-body block-body--collapsible">
+			<xf:foreach loop="$recipients" value="$recipient" if="$recipient.user_id != $conversation.user_id">
+				<li class="block-row">
+					<div class="contentRow">
+						<xf:macro name="recipient" arg-recipient="{$recipient}" arg-conversation="{$conversation}" />
+					</div>
+				</li>
+			</xf:foreach>
+		</ol>
+	<xf:else />
+		<!-- Small list, show all others -->
+		<ol class="block-body">
+			<xf:foreach loop="$recipients" value="$recipient" if="$recipient.user_id != $conversation.user_id">
+				<li class="block-row">
+					<div class="contentRow">
+						<xf:macro name="recipient" arg-recipient="{$recipient}" arg-conversation="{$conversation}" />
+					</div>
+				</li>
+			</xf:foreach>
+		</ol>
+	</xf:if>
+</xf:macro>
+
 <xf:macro id="with_recipients" arg-visitor="!" arg-conversation="!" arg-popup="false">
 	<xf:if is="count($conversation.recipients) < 10">
 		<xf:if is="$popup">

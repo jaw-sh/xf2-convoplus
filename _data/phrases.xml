@@ -9,6 +9,7 @@ Quotes your message in a direct message]]></phrase>
   <phrase title="hb_convo_invited_by_x" version_id="1" version_string="1.1.0"><![CDATA[Invited by {user}]]></phrase>
   <phrase title="hb_convo_kicked_by_x" version_id="1" version_string="1.1.0"><![CDATA[Kicked by {user}]]></phrase>
   <phrase title="hb_convo_lives_until_x" version_id="1" version_string="1.1.0"><![CDATA[Autodeletes {lifespan}]]></phrase>
+  <phrase title="hb_convo_x_other_participants" version_id="6" version_string="2.3.0"><![CDATA[{count} other participants]]></phrase>
   <phrase title="hb_direct_message_awake" version_id="2" version_string="2.0.0"><![CDATA[Awake to new messages in this chain.]]></phrase>
   <phrase title="hb_direct_message_sleeping" version_id="2" version_string="2.0.0"><![CDATA[Sleeping on new direct messages.]]></phrase>
   <phrase title="hb_item1_and_x_others" version_id="3" version_string="2.1.0"><![CDATA[{item1} and {others} others]]></phrase>
