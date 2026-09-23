@@ -33,6 +33,7 @@ class ConversationPrune
             $db->beginTransaction();
 
             $isNcmecActive = \XF::isAddOnActive('USIPS/NCMEC');
+            $preservedIds = [];
 
             foreach ($finder->fetch(10) AS $conversation) {
                 // 18 U.S. Code § 2703
@@ -50,6 +51,7 @@ class ConversationPrune
                     
                     if ($shouldPreserve)
                     {
+                        $preservedIds[] = $conversation->conversation_id;
                         continue;
                     }
                 }
@@ -58,6 +60,14 @@ class ConversationPrune
             }
 
             $db->commit();
+
+            // Exclude held conversations from later batches so a full batch of
+            // preserved conversations can't stall pruning of everything older.
+            if ($preservedIds)
+            {
+                $finder->where('conversation_id', '<>', $preservedIds);
+            }
+
             $newTotal = $finder->total();
         }
     }

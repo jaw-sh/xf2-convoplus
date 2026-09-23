@@ -1,0 +1,1 @@
+Force-joined via report #{report_id} (previous state: {previous_state})

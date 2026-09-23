@@ -10,55 +10,93 @@ class ReportController extends XFCP_ReportController
     {
         $visitor = \XF::visitor();
         $report = $this->assertViewableReport($params->report_id);
-        
-        // Check if this is a conversation_message report
-        if ($report->content_type === 'conversation_message')
+
+        // Force-join only applies to direct message reports.
+        if ($report->content_type !== 'conversation_message')
         {
-            $content = $report->getContent();
-            if ($content && $content->Conversation)
-            {
-                $conversation = $content->Conversation;
-                
-                // Check if the visitor is already a recipient
-                $recipient = $conversation->Recipients[$visitor->user_id] ?? null;
-                
-                if ($recipient)
-                {
-                    // User is already in the conversation - force set to active and clear kick/invite fields
-                    $recipient->recipient_state = 'active';
-                    $recipient->hb_kicked_by = 0;
-                    $recipient->hb_kicked_on = 0;
-                    $recipient->save();
-                }
-                else
-                {
-                    // User is not in the conversation - create new recipient record
-                    $newRecipient = $this->em()->create('XF:ConversationRecipient');
-                    $newRecipient->conversation_id = $conversation->conversation_id;
-                    $newRecipient->user_id = $visitor->user_id;
-                    $newRecipient->recipient_state = 'active';
-                    $newRecipient->last_read_date = 0;
-                    $newRecipient->hb_invited_on = \XF::$time;
-                    $newRecipient->hb_invited_by = $visitor->user_id;
-                    $newRecipient->hb_kicked_by = 0;
-                    $newRecipient->hb_kicked_on = 0;
-                    $newRecipient->save();
-                    
-                    // Update conversation recipient count
-                    $conversation->recipient_count++;
-                    $conversation->save();
-                }
-            }
+            return $this->redirect($this->buildLink('reports', $report));
         }
-        
-        // Get the content link and redirect
-        $contentLink = $content->getContentUrl();
-        if ($contentLink)
+
+        /** @var \XF\Entity\ConversationMessage|null $content */
+        $content = $report->getContent();
+        $conversation = $content ? $content->Conversation : null;
+        if (!$conversation)
         {
-            return $this->redirect($contentLink);
+            // The reported message (or its whole DM) has been deleted or pruned.
+            return $this->error(\XF::phrase('requested_direct_message_not_found'), 404);
         }
-        
-        // Fallback to report view if no content link available
-        return $this->redirect($this->buildLink('reports', $report));
+
+        /** @var \XF\Entity\ConversationRecipient|null $recipient */
+        $recipient = $conversation->Recipients[$visitor->user_id] ?? null;
+
+        // Already an active participant: nothing to change, just go to the message.
+        if ($recipient && $recipient->recipient_state === 'active')
+        {
+            return $this->redirect($content->getContentUrl());
+        }
+
+        // Joining changes membership, so require an explicit POST (CSRF-checked by core).
+        if (!$this->isPost())
+        {
+            $viewParams = [
+                'report' => $report,
+                'content' => $content,
+                'conversation' => $conversation,
+            ];
+            return $this->view('HappyBoard\ConvoPlus:Report\ForceJoin', 'hb_convo_force_join_confirm', $viewParams);
+        }
+
+        if ($recipient)
+        {
+            $previousState = $recipient->hb_kicked_by ? 'kicked' : $recipient->recipient_state;
+            $kickedBy = (int)$recipient->hb_kicked_by;
+        }
+        else
+        {
+            $previousState = 'none';
+            $kickedBy = 0;
+        }
+
+        $db = $this->app()->db();
+        $db->beginTransaction();
+
+        if ($recipient)
+        {
+            // Previously a participant (left, ignored or kicked) - reactivate and clear any kick.
+            $recipient->recipient_state = 'active';
+            $recipient->hb_kicked_by = 0;
+            $recipient->hb_kicked_on = 0;
+            $recipient->save(true, false);
+        }
+        else
+        {
+            /** @var \XF\Entity\ConversationRecipient $recipient */
+            $recipient = $this->em()->create('XF:ConversationRecipient');
+            $recipient->conversation_id = $conversation->conversation_id;
+            $recipient->user_id = $visitor->user_id;
+            $recipient->recipient_state = 'active';
+            $recipient->last_read_date = 0;
+            $recipient->hb_invited_on = \XF::$time;
+            $recipient->hb_invited_by = $visitor->user_id;
+            $recipient->hb_kicked_by = 0;
+            $recipient->hb_kicked_on = 0;
+            $recipient->save(true, false);
+        }
+
+        // Keep recipient_count and the cached recipient list (DM list/popup) accurate.
+        /** @var \XF\Repository\ConversationRepository $conversationRepo */
+        $conversationRepo = $this->repository('XF:Conversation');
+        $conversationRepo->rebuildConversationRecipientCache($conversation);
+
+        $this->app()->logger()->logModeratorAction('conversation', $conversation, 'force_join', [
+            'report_id' => $report->report_id,
+            'message_id' => $content->message_id,
+            'previous_state' => $previousState,
+            'kicked_by' => $kickedBy,
+        ]);
+
+        $db->commit();
+
+        return $this->redirect($content->getContentUrl());
     }
 }

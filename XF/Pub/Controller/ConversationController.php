@@ -256,6 +256,7 @@ class ConversationController extends XFCP_ConversationController
 				'recipient' => $recipient,
 				'user' => $recipient->User,
 
+                'confirmUrl' => $this->buildLink('direct-messages/kick', $conversation, ['user_id' => $recipient->user_id]),
                 'contentUrl' => $this->buildLink('conversations', $conversation),
                 'contentTitle' => $conversation->title,
                 'userName' => $recipient->User->username,
@@ -299,7 +300,17 @@ class ConversationController extends XFCP_ConversationController
 		if (!$recipient || $recipient->recipient_state !== 'deleted_ignored') {
 			return $this->noPermission();
 		}
-		
+
+		// Rejoining changes membership, so require an explicit POST (CSRF-checked by core).
+		if (!$this->isPost())
+		{
+			$viewParams = [
+				'conversation' => $conversation,
+				'recipient' => $recipient,
+			];
+			return $this->view('HappyBoard\ConvoPlus:Conversation\Rejoin', 'hb_convo_rejoin_confirm', $viewParams);
+		}
+
 		// Rejoin the conversation by setting recipient state to active
 		$recipient->recipient_state = 'active';
 		$recipient->save();

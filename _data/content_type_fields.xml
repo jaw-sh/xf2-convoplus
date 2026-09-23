@@ -1,2 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<content_type_fields/>
+<content_type_fields>
+  <field content_type="conversation" field_name="moderator_log_handler_class">HappyBoard\ConvoPlus\ModeratorLog\Conversation</field>
+</content_type_fields>

@@ -29,6 +29,12 @@
         "version_string": "2.0.0",
         "hash": "65d81a46abb55b405ec5bdd2d50135a1"
     },
+    "hb_convo_force_join_explain.txt": {
+        "global_cache": false,
+        "version_id": 8,
+        "version_string": "2.4.1",
+        "hash": "f1e143f19e6ed41d67ae9925d32ee3b0"
+    },
     "hb_convo_invited_by_x.txt": {
         "global_cache": false,
         "version_id": 1,
@@ -46,6 +52,12 @@
         "version_id": 1,
         "version_string": "1.1.0",
         "hash": "48878bd89f9c1413f700e108bbe53592"
+    },
+    "hb_convo_please_confirm_that_you_want_to_force_join.txt": {
+        "global_cache": false,
+        "version_id": 8,
+        "version_string": "2.4.1",
+        "hash": "a0df2d185758a9902b827d7038eb6dae"
     },
     "hb_direct_message_awake.txt": {
         "global_cache": false,
@@ -77,6 +89,12 @@
         "version_string": "1.1.0",
         "hash": "3dd0ade21c5cb3dca913e147d428b512"
     },
+    "hb_please_confirm_that_you_want_to_rejoin_the_following_direct_message.txt": {
+        "global_cache": false,
+        "version_id": 8,
+        "version_string": "2.4.1",
+        "hash": "a27ef2e9cd007c818bda2c2cadac1e43"
+    },
     "hb_please_confirm_that_you_wish_to_sleep_the_following_direct_message.txt": {
         "global_cache": false,
         "version_id": 2,
@@ -88,6 +106,12 @@
         "version_id": 2,
         "version_string": "2.0.0",
         "hash": "f2bb261f91a498492daa03469adfb8c7"
+    },
+    "hb_rejoin.txt": {
+        "global_cache": false,
+        "version_id": 8,
+        "version_string": "2.4.1",
+        "hash": "7ce409697822ac59c68f16f3c3c2b4a9"
     },
     "hb_sleep.txt": {
         "global_cache": false,
@@ -106,6 +130,12 @@
         "version_id": 2,
         "version_string": "2.0.0",
         "hash": "d003eb6e7f2a95db0a161c5c77d5cabc"
+    },
+    "mod_log.conversation_force_join.txt": {
+        "global_cache": false,
+        "version_id": 8,
+        "version_string": "2.4.1",
+        "hash": "9061d8105a2bbf03b723377002bd3bd7"
     },
     "x_mentioned_you_in_message_in_direct_message_y.txt": {
         "global_cache": false,

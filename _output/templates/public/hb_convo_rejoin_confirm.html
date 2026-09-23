@@ -1,0 +1,15 @@
+<xf:title>{{ phrase('hb_rejoin') }}</xf:title>
+
+<xf:breadcrumb href="{{ link('direct-messages') }}">{{ phrase('direct_messages') }}</xf:breadcrumb>
+
+<xf:form action="{{ link('direct-messages/rejoin', $conversation) }}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				{{ phrase('hb_please_confirm_that_you_want_to_rejoin_the_following_direct_message:') }}
+				<strong>{$conversation.title}</strong>
+			</xf:inforow>
+		</div>
+		<xf:submitrow submit="{{ phrase('hb_rejoin') }}" icon="confirm" rowtype="simple" />
+	</div>
+</xf:form>

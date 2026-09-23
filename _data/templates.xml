@@ -154,6 +154,24 @@
 		{{ {$userConv.hb_sleeping} ? phrase('hb_wake') : phrase('hb_sleep') }}
 	</xf:button>
 </xf:macro>]]></template>
+  <template type="public" title="hb_convo_force_join_confirm" version_id="8" version_string="2.4.1"><![CDATA[<xf:title>{{ phrase('hb_convo_force_join') }}</xf:title>
+
+<xf:breadcrumb href="{{ link('reports') }}">{{ phrase('reports') }}</xf:breadcrumb>
+<xf:breadcrumb href="{{ link('reports', $report) }}">{$report.title}</xf:breadcrumb>
+
+<xf:form action="{{ link('reports/go-to-content', $report) }}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				{{ phrase('hb_convo_please_confirm_that_you_want_to_force_join:') }}
+				<strong>{$conversation.title}</strong>
+				<div class="u-muted">{{ phrase('hb_convo_force_join_explain') }}</div>
+			</xf:inforow>
+		</div>
+		<xf:submitrow submit="{{ phrase('hb_convo_force_join') }}" icon="confirm" rowtype="simple" />
+	</div>
+</xf:form>
+]]></template>
   <template type="public" title="hb_convo_kick_confirm" version_id="1" version_string="1.1.0"><![CDATA[<xf:title>{{ phrase('confirm_action') }}</xf:title>
 
 <xf:form action="{$confirmUrl}" ajax="true" class="block">
@@ -176,9 +194,27 @@
 		<xf:submitrow icon="confirm" rowtype="simple" />
 	</div>
 </xf:form>]]></template>
-  <template type="public" title="hb_convo_report_macros" version_id="2" version_string="2.0.0"><![CDATA[<xf:macro id="join_conversation" arg-report="!">
-	<div class="block-footer">
-		<span class="block-footer-controls"><xf:button href="{{ link('reports/go-to-content', $report) }}">{{ phrase('hb_convo_force_join') }}</xf:button></span>
+  <template type="public" title="hb_convo_rejoin_confirm" version_id="8" version_string="2.4.1"><![CDATA[<xf:title>{{ phrase('hb_rejoin') }}</xf:title>
+
+<xf:breadcrumb href="{{ link('direct-messages') }}">{{ phrase('direct_messages') }}</xf:breadcrumb>
+
+<xf:form action="{{ link('direct-messages/rejoin', $conversation) }}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				{{ phrase('hb_please_confirm_that_you_want_to_rejoin_the_following_direct_message:') }}
+				<strong>{$conversation.title}</strong>
+			</xf:inforow>
+		</div>
+		<xf:submitrow submit="{{ phrase('hb_rejoin') }}" icon="confirm" rowtype="simple" />
 	</div>
+</xf:form>
+]]></template>
+  <template type="public" title="hb_convo_report_macros" version_id="8" version_string="2.4.1"><![CDATA[<xf:macro id="join_conversation" arg-report="!">
+	<xf:if is="$report.Content">
+		<div class="block-footer">
+			<span class="block-footer-controls"><xf:button href="{{ link('reports/go-to-content', $report) }}" overlay="true">{{ phrase('hb_convo_force_join') }}</xf:button></span>
+		</div>
+	</xf:if>
 </xf:macro>]]></template>
 </templates>

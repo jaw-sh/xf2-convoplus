@@ -1,0 +1,17 @@
+<xf:title>{{ phrase('hb_convo_force_join') }}</xf:title>
+
+<xf:breadcrumb href="{{ link('reports') }}">{{ phrase('reports') }}</xf:breadcrumb>
+<xf:breadcrumb href="{{ link('reports', $report) }}">{$report.title}</xf:breadcrumb>
+
+<xf:form action="{{ link('reports/go-to-content', $report) }}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				{{ phrase('hb_convo_please_confirm_that_you_want_to_force_join:') }}
+				<strong>{$conversation.title}</strong>
+				<div class="u-muted">{{ phrase('hb_convo_force_join_explain') }}</div>
+			</xf:inforow>
+		</div>
+		<xf:submitrow submit="{{ phrase('hb_convo_force_join') }}" icon="confirm" rowtype="simple" />
+	</div>
+</xf:form>

@@ -6,20 +6,25 @@ Quotes your message in a direct message]]></phrase>
   <phrase title="cron_entry.HBConverastionPrune" version_id="0" version_string="1.0.0 Alpha"><![CDATA[Prune old conversations]]></phrase>
   <phrase title="hb_cannot_rejoin_kicked_conversation" version_id="3" version_string="2.1.0"><![CDATA[You are not permitted to rejoin this conversation because you were kicked from it.]]></phrase>
   <phrase title="hb_convo_force_join" version_id="2" version_string="2.0.0"><![CDATA[Join Conversation]]></phrase>
+  <phrase title="hb_convo_force_join_explain" version_id="8" version_string="2.4.1"><![CDATA[You will be able to read the entire message history and will receive new replies until you leave. This action is recorded in the moderator log.]]></phrase>
   <phrase title="hb_convo_invited_by_x" version_id="1" version_string="1.1.0"><![CDATA[Invited by {user}]]></phrase>
   <phrase title="hb_convo_kicked_by_x" version_id="1" version_string="1.1.0"><![CDATA[Kicked by {user}]]></phrase>
   <phrase title="hb_convo_lives_until_x" version_id="1" version_string="1.1.0"><![CDATA[Autodeletes {lifespan}]]></phrase>
+  <phrase title="hb_convo_please_confirm_that_you_want_to_force_join" version_id="8" version_string="2.4.1"><![CDATA[Please confirm that you want to join the following direct message as a participant]]></phrase>
   <phrase title="hb_convo_x_other_participants" version_id="6" version_string="2.3.0"><![CDATA[{count} other participants]]></phrase>
   <phrase title="hb_direct_message_awake" version_id="2" version_string="2.0.0"><![CDATA[Awake to new messages in this chain.]]></phrase>
   <phrase title="hb_direct_message_sleeping" version_id="2" version_string="2.0.0"><![CDATA[Sleeping on new direct messages.]]></phrase>
   <phrase title="hb_item1_and_x_others" version_id="3" version_string="2.1.0"><![CDATA[{item1} and {others} others]]></phrase>
   <phrase title="hb_kick" version_id="1" version_string="1.1.0"><![CDATA[Kick]]></phrase>
   <phrase title="hb_please_confirm_that_you_want_to_kick" version_id="1" version_string="1.1.0"><![CDATA[Please confirm that you want to kick this user from this conversation]]></phrase>
+  <phrase title="hb_please_confirm_that_you_want_to_rejoin_the_following_direct_message" version_id="8" version_string="2.4.1"><![CDATA[Please confirm that you want to rejoin the following direct message]]></phrase>
   <phrase title="hb_please_confirm_that_you_wish_to_sleep_the_following_direct_message" version_id="2" version_string="2.0.0"><![CDATA[Please confirm that you wish to sleep the following direct message]]></phrase>
   <phrase title="hb_please_confirm_that_you_wish_to_wake_the_following_direct_message" version_id="2" version_string="2.0.0"><![CDATA[Please confirm that you wish to wake the following direct message]]></phrase>
+  <phrase title="hb_rejoin" version_id="8" version_string="2.4.1"><![CDATA[Rejoin]]></phrase>
   <phrase title="hb_sleep" version_id="2" version_string="2.0.0"><![CDATA[Sleep]]></phrase>
   <phrase title="hb_wake" version_id="2" version_string="2.0.0"><![CDATA[Wake]]></phrase>
   <phrase title="hb_x_kicked_you_from_direct_message_y" version_id="2" version_string="2.0.0"><![CDATA[{name} kicked you from the direct message chain {title}.]]></phrase>
+  <phrase title="mod_log.conversation_force_join" version_id="8" version_string="2.4.1"><![CDATA[Force-joined via report #{report_id} (previous state: {previous_state})]]></phrase>
   <phrase title="x_mentioned_you_in_message_in_direct_message_y" version_id="3" version_string="2.1.0"><![CDATA[{name} mentioned you in a message in the direct message {title}.]]></phrase>
   <phrase title="x_quoted_your_message_in_direct_message_y" version_id="3" version_string="2.1.0"><![CDATA[{name} quoted your message in the direct message {title}.]]></phrase>
 </phrases>

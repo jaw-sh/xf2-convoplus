@@ -24,14 +24,24 @@
         "version_string": "2.3.0",
         "hash": "63f24d3d7a7bcfc003f6f7844cc6d7de"
     },
+    "public/hb_convo_force_join_confirm.html": {
+        "version_id": 8,
+        "version_string": "2.4.1",
+        "hash": "41672815689da122fc4d1aea29ffa31a"
+    },
     "public/hb_convo_kick_confirm.html": {
         "version_id": 1,
         "version_string": "1.1.0",
         "hash": "b88301a1f9c9ce2e7101644d31c7948e"
     },
+    "public/hb_convo_rejoin_confirm.html": {
+        "version_id": 8,
+        "version_string": "2.4.1",
+        "hash": "64026511c5b85808c720828177ba8219"
+    },
     "public/hb_convo_report_macros.html": {
-        "version_id": 2,
-        "version_string": "2.0.0",
-        "hash": "ac20977ccb113b5fe68dfe1f90a9eae2"
+        "version_id": 8,
+        "version_string": "2.4.1",
+        "hash": "8bb77fef2fb18be596ed187860756901"
     }
 }
