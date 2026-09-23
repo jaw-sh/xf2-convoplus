@@ -1,7 +1,13 @@
 <xf:macro id="join_conversation" arg-report="!">
-	<xf:if is="$report.Content">
-		<div class="block-footer">
-			<span class="block-footer-controls"><xf:button href="{{ link('reports/go-to-content', $report) }}" overlay="true">{{ phrase('hb_convo_force_join') }}</xf:button></span>
-		</div>
+	<xf:if is="$report.Content && $report.Content.Conversation">
+		<xf:if is="in_array($xf.visitor.user_id, $report.Content.Conversation.active_recipient_user_ids)">
+			<div class="block-footer">
+				<span class="block-footer-controls"><xf:button href="{{ link('direct-messages/replies', $report.Content) }}">{{ phrase('go_to_content') }}</xf:button></span>
+			</div>
+		<xf:elseif is="in_array($report.report_state, ['open', 'assigned'])" />
+			<div class="block-footer">
+				<span class="block-footer-controls"><xf:button href="{{ link('reports/go-to-content', $report) }}" overlay="true">{{ phrase('hb_convo_force_join') }}</xf:button></span>
+			</div>
+		</xf:if>
 	</xf:if>
 </xf:macro>

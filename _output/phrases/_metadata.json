@@ -23,6 +23,12 @@
         "version_string": "2.1.0",
         "hash": "ba339eb1554ad7620bfbcb11be898017"
     },
+    "hb_convo_already_participant_x.txt": {
+        "global_cache": false,
+        "version_id": 9,
+        "version_string": "2.4.2",
+        "hash": "332a96b11a696ae3134d8cab698cafee"
+    },
     "hb_convo_force_join.txt": {
         "global_cache": false,
         "version_id": 2,
@@ -34,6 +40,12 @@
         "version_id": 8,
         "version_string": "2.4.1",
         "hash": "f1e143f19e6ed41d67ae9925d32ee3b0"
+    },
+    "hb_convo_force_join_report_not_open.txt": {
+        "global_cache": false,
+        "version_id": 9,
+        "version_string": "2.4.2",
+        "hash": "c6ce3b3dc1ff05d1f09a08b9971ca66f"
     },
     "hb_convo_invited_by_x.txt": {
         "global_cache": false,

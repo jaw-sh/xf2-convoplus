@@ -5,8 +5,10 @@
 Quotes your message in a direct message]]></phrase>
   <phrase title="cron_entry.HBConverastionPrune" version_id="0" version_string="1.0.0 Alpha"><![CDATA[Prune old conversations]]></phrase>
   <phrase title="hb_cannot_rejoin_kicked_conversation" version_id="3" version_string="2.1.0"><![CDATA[You are not permitted to rejoin this conversation because you were kicked from it.]]></phrase>
+  <phrase title="hb_convo_already_participant_x" version_id="9" version_string="2.4.2"><![CDATA[You are already a participant in this direct message. <a href="{url}">Go to message</a>]]></phrase>
   <phrase title="hb_convo_force_join" version_id="2" version_string="2.0.0"><![CDATA[Join Conversation]]></phrase>
   <phrase title="hb_convo_force_join_explain" version_id="8" version_string="2.4.1"><![CDATA[You will be able to read the entire message history and will receive new replies until you leave. This action is recorded in the moderator log.]]></phrase>
+  <phrase title="hb_convo_force_join_report_not_open" version_id="9" version_string="2.4.2"><![CDATA[You can only join a direct message from a report that is open or assigned. Reopen the report first if you still need access.]]></phrase>
   <phrase title="hb_convo_invited_by_x" version_id="1" version_string="1.1.0"><![CDATA[Invited by {user}]]></phrase>
   <phrase title="hb_convo_kicked_by_x" version_id="1" version_string="1.1.0"><![CDATA[Kicked by {user}]]></phrase>
   <phrase title="hb_convo_lives_until_x" version_id="1" version_string="1.1.0"><![CDATA[Autodeletes {lifespan}]]></phrase>

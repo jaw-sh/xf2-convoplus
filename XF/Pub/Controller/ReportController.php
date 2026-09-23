@@ -32,7 +32,20 @@ class ReportController extends XFCP_ReportController
         // Already an active participant: nothing to change, just go to the message.
         if ($recipient && $recipient->recipient_state === 'active')
         {
+            if ($this->request->isXhr())
+            {
+                // Opened as an overlay; don't render the whole DM inside it.
+                return $this->message(\XF::phrase('hb_convo_already_participant_x', [
+                    'url' => $content->getContentUrl(),
+                ]));
+            }
             return $this->redirect($content->getContentUrl());
+        }
+
+        // Only open or assigned reports may be used to join a DM.
+        if (!in_array($report->report_state, ['open', 'assigned'], true))
+        {
+            return $this->error(\XF::phrase('hb_convo_force_join_report_not_open'));
         }
 
         // Joining changes membership, so require an explicit POST (CSRF-checked by core).
