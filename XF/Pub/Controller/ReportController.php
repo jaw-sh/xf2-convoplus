@@ -3,9 +3,82 @@
 namespace HappyBoard\ConvoPlus\XF\Pub\Controller;
 
 use XF\Mvc\ParameterBag;
+use HappyBoard\ConvoPlus\XF\PrunePrivacy;
 
 class ReportController extends XFCP_ReportController
 {
+    public function actionView(ParameterBag $params)
+    {
+        $report = $this->assertViewableReport($params->report_id);
+        $id = PrunePrivacy::reportConversationId($report);
+        if (!PrunePrivacy::hiddenConversation($id))
+        {
+            return parent::actionView($params);
+        }
+        $prune = $this->repository('HappyBoard\\ConvoPlus:Prune')->findRecord($id);
+        // Never pass the Report entity, snapshots, participant relations or comment text to this view.
+        $metadata = [
+            'report_id' => $report->report_id, 'conversation_id' => $id,
+            'report_state' => $report->report_state, 'first_report_date' => $report->first_report_date,
+            'last_modified_date' => $report->last_modified_date, 'report_count' => $report->report_count,
+            'prune_state' => $prune['state'] ?? 'pending', 'hold_reason' => $prune['hold_reason'] ?? '',
+        ];
+        $history = $this->app()->db()->fetchAll('
+            SELECT report_comment_id, comment_date, state_change, is_report
+            FROM xf_report_comment WHERE report_id = ? ORDER BY comment_date, report_comment_id
+        ', $report->report_id);
+        return $this->view('HappyBoard\\ConvoPlus:Report\\Pruned', 'hb_convo_pruned_report', [
+            'metadata' => $metadata, 'history' => $history,
+            'canRestore' => \XF::visitor()->hasAdminPermission('hbConvoPrune'),
+        ]);
+    }
+
+    public function actionUpdate(ParameterBag $params)
+    {
+        $this->assertPostOnly();
+        $report = $this->assertViewableReport($params->report_id);
+        if (!PrunePrivacy::hiddenConversation(PrunePrivacy::reportConversationId($report)))
+        {
+            return parent::actionUpdate($params);
+        }
+        $state = $this->filter('report_state', 'str');
+        if (!in_array($state, ['resolved', 'rejected'], true))
+        {
+            return $this->error(\XF::phrase('hb_convo_pruned_report_resolution_required'));
+        }
+        $commenter = $this->service('XF:Report\\Commenter', $report);
+        $commenter->setMessage('');
+        $commenter->setReportState($state);
+        if (!$commenter->validate($errors))
+        {
+            return $this->error($errors);
+        }
+        $commenter->save();
+        return $this->redirect($this->buildLink('reports', ['report_id' => $report->report_id]));
+    }
+
+    public function actionDraft(ParameterBag $params)
+    {
+        $report = $this->assertViewableReport($params->report_id);
+        $id = PrunePrivacy::reportConversationId($report);
+        if (PrunePrivacy::hiddenConversation($id))
+        {
+            return $this->error(\XF::phrase('hb_prune_conversation_gone', ['id' => $id]), 410);
+        }
+        return parent::actionDraft($params);
+    }
+
+    public function actionReassign(ParameterBag $params)
+    {
+        $report = $this->assertViewableReport($params->report_id);
+        $id = PrunePrivacy::reportConversationId($report);
+        if (PrunePrivacy::hiddenConversation($id))
+        {
+            return $this->error(\XF::phrase('hb_convo_pruned_report_resolution_required'));
+        }
+        return parent::actionReassign($params);
+    }
+
     public function actionGoToContent(ParameterBag $params)
     {
         $visitor = \XF::visitor();
@@ -15,6 +88,12 @@ class ReportController extends XFCP_ReportController
         if ($report->content_type !== 'conversation_message')
         {
             return $this->redirect($this->buildLink('reports', $report));
+        }
+
+        $conversationId = PrunePrivacy::reportConversationId($report);
+        if (PrunePrivacy::hiddenConversation($conversationId))
+        {
+            return $this->error(\XF::phrase('hb_prune_conversation_gone', ['id' => $conversationId]), 410);
         }
 
         /** @var \XF\Entity\ConversationMessage|null $content */

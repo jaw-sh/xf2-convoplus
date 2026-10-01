@@ -270,6 +270,12 @@
     <xf:formrow label="{{ phrase('hb_convo_prune_purge_after') }}">{{ date_time($metadata.purge_after) }}</xf:formrow>
   </div></div></div>
   <xf:if is="($metadata.state == 'pending' || $metadata.state == 'held') AND $metadata.start_date">
+    <xf:if is="$metadata.state == 'held'">
+      <xf:form action="{{ link('hb-convo-prune/release-hold') }}" class="block">
+        <xf:hiddenval name="conversation_id">{$metadata.conversation_id}</xf:hiddenval>
+        <xf:button type="submit">{{ phrase('hb_convo_prune_release_hold') }}</xf:button>
+      </xf:form>
+    </xf:if>
     <xf:form action="{{ link('hb-convo-prune/restore') }}" class="block">
       <xf:hiddenval name="conversation_id">{$metadata.conversation_id}</xf:hiddenval>
       <xf:button type="submit">{{ phrase('restore') }}</xf:button>
@@ -320,4 +326,42 @@
 </xf:datalist></div>
 <div class="block-outer block-outer--after"><xf:pagenav page="{$page}" perpage="100" total="{$total}" link="hb-convo-prune/log" /></div>
 </div>]]></template>
+  <template type="public" title="hb_convo_pruned_report" version_id="11" version_string="2.5.1"><![CDATA[<xf:title>{{ phrase('hb_convo_pruned_report_title', {'id': $metadata.report_id}) }}</xf:title>
+<xf:breadcrumb href="{{ link('reports') }}">{{ phrase('reports') }}</xf:breadcrumb>
+<div class="blockMessage">{{ phrase('hb_convo_pruned_report_explain') }}</div>
+<div class="block"><div class="block-container"><div class="block-body">
+  <xf:formrow label="{{ phrase('hb_convo_prune_id') }}">#{$metadata.conversation_id}</xf:formrow>
+  <xf:formrow label="{{ phrase('status') }}">{$metadata.report_state}</xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_state') }}">{$metadata.prune_state}</xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_hold_reason') }}">{$metadata.hold_reason}</xf:formrow>
+  <xf:formrow label="{{ phrase('created') }}">{{ date_time($metadata.first_report_date) }}</xf:formrow>
+  <xf:formrow label="{{ phrase('updated') }}">{{ date_time($metadata.last_modified_date) }}</xf:formrow>
+  <xf:formrow label="{{ phrase('reports') }}">{$metadata.report_count}</xf:formrow>
+</div></div></div>
+<xf:if is="$history is not empty">
+  <div class="block"><div class="block-container"><h3 class="block-header">{{ phrase('hb_convo_pruned_report_history') }}</h3>
+    <ul class="block-body"><xf:foreach loop="$history" value="$event">
+      <li class="block-row">#{$event.report_comment_id}: {{ date_time($event.comment_date) }} <xf:if is="$event.is_report">{{ phrase('report_noun') }}</xf:if> {$event.state_change}</li>
+    </xf:foreach></ul>
+  </div></div>
+</xf:if>
+<xf:if is="$metadata.report_state == 'open' || $metadata.report_state == 'assigned'">
+  <xf:form action="{{ link('reports/update', {'report_id': $metadata.report_id}) }}" class="block">
+    <div class="block-container"><div class="block-body">
+      <xf:radiorow name="report_state" label="{{ phrase('status') }}">
+        <xf:option value="resolved" selected="true">{{ phrase('report_state.resolved') }}</xf:option>
+        <xf:option value="rejected">{{ phrase('report_state.rejected') }}</xf:option>
+      </xf:radiorow>
+    </div><xf:submitrow icon="save" /></div>
+  </xf:form>
+</xf:if>
+<xf:if is="$canRestore && ($metadata.prune_state == 'pending' || $metadata.prune_state == 'held')">
+  <xf:button href="{{ link_type('admin', 'hb-convo-prune/restore', null, {'conversation_id': $metadata.conversation_id}) }}">{{ phrase('hb_convo_prune_restore') }}</xf:button>
+</xf:if>]]></template>
+  <template type="public" title="hb_convo_pruned_report_macros" version_id="11" version_string="2.5.1"><![CDATA[<xf:macro id="item" arg-report="!">
+  <div class="structItem structItem--report"><div class="structItem-cell structItem-cell--main">
+    <a href="{{ link('reports', $report) }}" class="structItem-title">{{ phrase('hb_convo_pruned_report_title', {'id': $report.report_id}) }}</a>
+    <div class="structItem-minor">{$report.getReportState()} · {{ date_time($report.first_report_date) }}</div>
+  </div><div class="structItem-cell structItem-cell--latest">{{ date_time($report.last_modified_date) }}</div></div>
+</xf:macro>]]></template>
 </templates>

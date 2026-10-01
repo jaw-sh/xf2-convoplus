@@ -7,28 +7,29 @@ use XF\Mvc\ParameterBag;
 use XF\Finder\ConversationRecipientFinder;
 use XF\Repository\AttachmentRepository;
 use XF\Repository\UserAlertRepository;
+use HappyBoard\ConvoPlus\XF\PrunePrivacy;
 
 class ConversationController extends XFCP_ConversationController
 {
 	protected function assertViewableUserConversation($conversationId, array $extraWith = [])
 	{
-		$conversation = parent::assertViewableUserConversation($conversationId, $extraWith);
-		if ($conversation->Master->isAutoPruned())
+		if (PrunePrivacy::pendingUserConversation((int)$conversationId, \XF::visitor()->user_id))
 		{
 			throw $this->exception($this->error(\XF::phrase('hb_prune_conversation_gone', [
 				'id' => $conversationId,
 			]), 410));
+		}
+		$conversation = parent::assertViewableUserConversation($conversationId, $extraWith);
+		if ($conversation->Master->isAutoPruned())
+		{
+			throw $this->exception($this->error(\XF::phrase('hb_prune_conversation_gone', ['id' => $conversationId]), 410));
 		}
 		return $conversation;
 	}
 
 	protected function assertViewableMessage($messageId, array $extraWith = [])
 	{
-		$conversationId = $this->app()->db()->fetchOne('
-			SELECT message.conversation_id FROM xf_conversation_message AS message
-			INNER JOIN xf_conversation_master AS master USING (conversation_id)
-			WHERE message.message_id = ? AND master.hb_pruned_date > 0
-		', $messageId);
+		$conversationId = PrunePrivacy::pendingMessageConversation((int)$messageId);
 		if ($conversationId)
 		{
 			throw $this->exception($this->error(\XF::phrase('hb_prune_conversation_gone', [

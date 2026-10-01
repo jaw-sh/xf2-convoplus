@@ -1,0 +1,1 @@
+For an auto-pruned direct message, choose Resolve or Reject on the metadata report page.

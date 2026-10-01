@@ -118,21 +118,7 @@ class Prune extends Repository
                     return false;
                 }
                 $users = $this->recipientIds($conversationId);
-                $conversation = $this->em->find('XF:ConversationMaster', $conversationId);
-                $restoreValues = ['hb_pruned_date' => 0, 'hb_prune_clock' => \XF::$time];
-                if (isset($conversation->structure()->columns['hb_pruned_date'], $conversation->structure()->columns['hb_prune_clock']))
-                {
-                    $conversation->fastUpdate($restoreValues);
-                }
-                else
-                {
-                    // XF disables this add-on's entity extensions before calling Setup::uninstall().
-                    // The locked raw stamp still proves ownership while the core structure lacks our columns.
-                    $db->update('xf_conversation_master', $restoreValues,
-                        'conversation_id = ? AND hb_pruned_date = ?', [$conversationId, (int)$record['pruned_date']]);
-                    $this->em->detachEntity($conversation);
-                    $conversation = $this->em->find('XF:ConversationMaster', $conversationId);
-                }
+                $conversation = $this->clearPruneMarker($conversationId, (int)$record['pruned_date']);
                 $db->update('xf_hb_convo_prune', [
                     'state' => 'restored', 'hold_reason' => '', 'resolved_date' => \XF::$time,
                     'resolved_user_id' => $userId, 'purge_attempts' => 0,
@@ -147,15 +133,7 @@ class Prune extends Repository
                 throw $e;
             }
             // Rebuild indexing after the visibility change has committed.
-            try
-            {
-                $this->app()->search()->index('conversation', $conversation);
-                $conversation->getBehavior('XF:IndexableContainer')->triggerReindex();
-            }
-            catch (\Throwable $e)
-            {
-                \XF::logException($e, false, 'Restored conversation search rebuild failed (' . $conversationId . '): ');
-            }
+            $this->reindexRecoveredConversation($conversation);
             return true;
         });
     }
@@ -177,54 +155,182 @@ class Prune extends Repository
 
     public function cancel(int $conversationId, string $reason): void
     {
-        $this->db()->update('xf_hb_convo_prune', [
-            'state' => 'cancelled', 'hold_reason' => '', 'resolved_date' => \XF::$time,
-        ], 'conversation_id = ?', $conversationId);
-        (new Audit($this->app()))->log('conversation', $conversationId, 'cancel', ['reason' => $reason]);
+        $result = (new Lock($this->db()))->run('hbConvoPrune', function () use ($conversationId, $reason) {
+            $db = $this->db();
+            $db->beginTransaction();
+            $conversation = null;
+            try
+            {
+                $master = $db->fetchRow('SELECT conversation_id, hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ? FOR UPDATE', $conversationId);
+                $record = $db->fetchRow('SELECT * FROM xf_hb_convo_prune WHERE conversation_id = ? FOR UPDATE', $conversationId);
+                if (!$record || !in_array($record['state'], ['pending', 'held', 'cancelled'], true))
+                {
+                    $db->rollback();
+                    return true;
+                }
+                if ($master && (int)$master['hb_pruned_date'] > 0)
+                {
+                    // An invalid stamp can never authorize deletion; clearing it rescues the intact conversation.
+                    $conversation = $this->clearPruneMarker($conversationId, (int)$master['hb_pruned_date']);
+                    $this->rebuildUnread($this->recipientIds($conversationId));
+                }
+                $db->update('xf_hb_convo_prune', [
+                    'state' => 'cancelled', 'hold_reason' => '', 'resolved_date' => \XF::$time,
+                    'purge_attempts' => 0,
+                ], 'conversation_id = ?', $conversationId);
+                (new Audit($this->app()))->log('conversation', $conversationId, 'cancel', ['reason' => $reason]);
+                $db->commit();
+            }
+            catch (\Throwable $e)
+            {
+                $db->rollback();
+                throw $e;
+            }
+            if ($conversation)
+            {
+                $this->reindexRecoveredConversation($conversation);
+            }
+            return true;
+        });
+        if ($result !== true)
+        {
+            throw new \InvalidArgumentException('Conversation auto-prune is busy. Retry the cancellation.');
+        }
+    }
+
+    protected function clearPruneMarker(int $conversationId, int $stamp): \XF\Entity\ConversationMaster
+    {
+        $conversation = $this->em->find('XF:ConversationMaster', $conversationId);
+        $values = ['hb_pruned_date' => 0, 'hb_prune_clock' => \XF::$time];
+        if (isset($conversation->structure()->columns['hb_pruned_date'], $conversation->structure()->columns['hb_prune_clock']))
+        {
+            $conversation->fastUpdate($values);
+        }
+        else
+        {
+            // XF disables entity extensions before Setup::uninstall(); the raw locked stamp proves ownership.
+            $this->db()->update('xf_conversation_master', $values,
+                'conversation_id = ? AND hb_pruned_date = ?', [$conversationId, $stamp]);
+            $this->em->detachEntity($conversation);
+            $conversation = $this->em->find('XF:ConversationMaster', $conversationId);
+        }
+        return $conversation;
+    }
+
+    protected function reindexRecoveredConversation(\XF\Entity\ConversationMaster $conversation): void
+    {
+        try
+        {
+            $this->app()->search()->index('conversation', $conversation);
+            $conversation->getBehavior('XF:IndexableContainer')->triggerReindex();
+        }
+        catch (\Throwable $e)
+        {
+            \XF::logException($e, false, 'Recovered conversation search rebuild failed (' . $conversation->conversation_id . '): ');
+        }
     }
 
     public function refreshHolds(): int
     {
-        $changed = 0;
-        $checker = new HoldChecker($this->app());
-        $records = $this->db()->fetchAll("SELECT p.*, c.hb_pruned_date FROM xf_hb_convo_prune p
-            LEFT JOIN xf_conversation_master c ON (c.conversation_id = p.conversation_id)
-            WHERE p.state IN ('pending', 'held') ORDER BY p.conversation_id");
-        foreach ($records AS $record)
-        {
-            $id = (int)$record['conversation_id'];
-            if ((int)$record['hb_pruned_date'] !== (int)$record['pruned_date'] || !(int)$record['pruned_date'])
+        return (int)((new Lock($this->db()))->run('hbConvoPrune', function () {
+            $db = $this->db();
+            $changed = 0;
+            $checker = new HoldChecker($this->app());
+            $cutoff = \XF::$time - $this->getConfig()['inactivity_days'] * 86400;
+            $ids = $db->fetchAllColumn("SELECT p.conversation_id FROM xf_hb_convo_prune p
+                LEFT JOIN xf_conversation_master c ON (c.conversation_id = p.conversation_id)
+                WHERE p.state IN ('pending', 'held') OR (p.state = 'cancelled' AND c.hb_pruned_date > 0)
+                ORDER BY p.conversation_id");
+            foreach ($ids AS $conversationId)
             {
-                $this->cancel($id, 'prune_stamp_changed');
-                $changed++;
-                continue;
+                $id = (int)$conversationId;
+                $db->beginTransaction();
+                try
+                {
+                    $master = $db->fetchRow('SELECT conversation_id, hb_pruned_date, start_date, last_message_date, hb_prune_clock
+                        FROM xf_conversation_master WHERE conversation_id = ? FOR UPDATE', $id);
+                    $record = $db->fetchRow('SELECT * FROM xf_hb_convo_prune WHERE conversation_id = ? FOR UPDATE', $id);
+                    if (!$record || !in_array($record['state'], ['pending', 'held', 'cancelled'], true))
+                    {
+                        $db->rollback();
+                        continue;
+                    }
+                    if ($record['state'] === 'cancelled')
+                    {
+                        if ($master && (int)$master['hb_pruned_date'] > 0)
+                        {
+                            $this->cancel($id, 'cancelled_stamp_recovery');
+                            $changed++;
+                        }
+                    }
+                    else if (!$master || (int)$master['hb_pruned_date'] !== (int)$record['pruned_date'] || !(int)$record['pruned_date'])
+                    {
+                        $this->cancel($id, 'prune_stamp_changed');
+                        $changed++;
+                    }
+                    else if (max((int)$master['start_date'], (int)$master['last_message_date'], (int)$master['hb_prune_clock']) >= $cutoff)
+                    {
+                        $this->cancel($id, 'not_inactive');
+                        $changed++;
+                    }
+                    else if ($reason = $checker->conversation($id))
+                    {
+                        $this->setHeld($id, $reason);
+                    }
+                    else if ($record['state'] === 'held' && (int)$record['purge_attempts'] < 3)
+                    {
+                        $db->update('xf_hb_convo_prune', ['state' => 'pending', 'hold_reason' => ''], 'conversation_id = ?', $id);
+                        (new Audit($this->app()))->log('conversation', $id, 'release');
+                        $changed++;
+                    }
+                    $db->commit();
+                }
+                catch (\Throwable $e)
+                {
+                    $db->rollback();
+                    throw $e;
+                }
             }
-            $reason = $checker->conversation($id);
-            if ($reason)
-            {
-                $this->setHeld($id, $reason);
-            }
-            else if ($record['state'] === 'held' && (int)$record['purge_attempts'] < 3)
-            {
-                $this->db()->update('xf_hb_convo_prune', ['state' => 'pending', 'hold_reason' => ''], 'conversation_id = ?', $id);
-                (new Audit($this->app()))->log('conversation', $id, 'release');
-                $changed++;
-            }
-        }
-        return $changed;
+            return $changed;
+        }) ?? 0);
     }
 
     public function releaseHold(int $conversationId, int $userId = 0): bool
     {
         return (bool)(new Lock($this->db()))->run('hbConvoPrune', function () use ($conversationId, $userId) {
-            $record = $this->findRecord($conversationId);
-            if (!$record || $record['state'] !== 'held' || (new HoldChecker($this->app()))->conversation($conversationId))
+            $db = $this->db();
+            $db->beginTransaction();
+            try
             {
-                return false;
+                $master = $db->fetchRow('SELECT conversation_id, hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ? FOR UPDATE', $conversationId);
+                $record = $db->fetchRow('SELECT * FROM xf_hb_convo_prune WHERE conversation_id = ? FOR UPDATE', $conversationId);
+                if (!$record || $record['state'] !== 'held')
+                {
+                    $db->rollback();
+                    return false;
+                }
+                if (!$master || !(int)$record['pruned_date'] || (int)$master['hb_pruned_date'] !== (int)$record['pruned_date'])
+                {
+                    $this->cancel($conversationId, 'prune_stamp_changed');
+                    $db->commit();
+                    return false;
+                }
+                if ($reason = (new HoldChecker($this->app()))->conversation($conversationId))
+                {
+                    $this->setHeld($conversationId, $reason);
+                    $db->commit();
+                    return false;
+                }
+                $db->update('xf_hb_convo_prune', ['state' => 'pending', 'hold_reason' => '', 'purge_attempts' => 0], 'conversation_id = ?', $conversationId);
+                (new Audit($this->app()))->log('conversation', $conversationId, 'release', [], $userId);
+                $db->commit();
+                return true;
             }
-            $this->db()->update('xf_hb_convo_prune', ['state' => 'pending', 'hold_reason' => '', 'purge_attempts' => 0], 'conversation_id = ?', $conversationId);
-            (new Audit($this->app()))->log('conversation', $conversationId, 'release', [], $userId);
-            return true;
+            catch (\Throwable $e)
+            {
+                $db->rollback();
+                throw $e;
+            }
         });
     }
 

@@ -1,0 +1,6 @@
+{
+    "from_class": "HappyBoard\\ConvoPlus\\ModeratorLog\\Conversation",
+    "to_class": "HappyBoard\\ConvoPlus\\XF\\ModeratorLog\\Conversation",
+    "execute_order": 10,
+    "active": true
+}

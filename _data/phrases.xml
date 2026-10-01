@@ -68,4 +68,11 @@ Quotes your message in a direct message]]></phrase>
   <phrase title="hb_convo_prune_would_trip" version_id="10" version_string="2.5.0"><![CDATA[Would exceed a limit]]></phrase>
   <phrase title="hb_convo_kicked_notification" version_id="10" version_string="2.5.0"><![CDATA[{name} kicked you from a direct message.]]></phrase>
   <phrase title="hb_convo_prune_job_status" version_id="10" version_string="2.5.0"><![CDATA[Purging auto-pruned direct messages ({count} processed)]]></phrase>
+  <phrase title="hb_convo_pruned_report_title" version_id="11" version_string="2.5.1"><![CDATA[Auto-pruned direct message report #{id}]]></phrase>
+  <phrase title="hb_convo_pruned_report_explain" version_id="11" version_string="2.5.1"><![CDATA[This direct message is unavailable while pruned. Only report metadata and status history are shown. You may resolve or reject the report without reading private content; closing the last active report removes its report hold.]]></phrase>
+  <phrase title="hb_convo_pruned_report_resolution_required" version_id="11" version_string="2.5.1"><![CDATA[For an auto-pruned direct message, choose Resolve or Reject on the metadata report page.]]></phrase>
+  <phrase title="hb_convo_pruned_report_history" version_id="11" version_string="2.5.1"><![CDATA[Report status history]]></phrase>
+  <phrase title="hb_convo_prune_log_content" version_id="11" version_string="2.5.1"><![CDATA[Auto-pruned direct message #{id}]]></phrase>
+  <phrase title="hb_convo_prune_release_hold" version_id="11" version_string="2.5.1"><![CDATA[Release hold]]></phrase>
+  <phrase title="hb_convo_prune_cannot_release_hold" version_id="11" version_string="2.5.1"><![CDATA[This hold cannot be released. Review its current legal or report holds and prune stamp.]]></phrase>
 </phrases>

@@ -15,9 +15,9 @@
         "hash": "4cd358e354ac637b5ab43c42503568c0"
     },
     "admin/hb_convo_prune_restore.html": {
-        "version_id": 10,
-        "version_string": "2.5.0",
-        "hash": "7dd6ed2bcff502888e50e226f63bd0c5"
+        "version_id": 11,
+        "version_string": "2.5.1",
+        "hash": "1a6181aae3cc238c9d0bbc8018ea0cad"
     },
     "admin/hb_convo_prune_settings.html": {
         "version_id": 10,
@@ -58,6 +58,16 @@
         "version_id": 1,
         "version_string": "1.1.0",
         "hash": "b88301a1f9c9ce2e7101644d31c7948e"
+    },
+    "public/hb_convo_pruned_report.html": {
+        "version_id": 11,
+        "version_string": "2.5.1",
+        "hash": "87f0f3593626e9ab060b54596f6112e5"
+    },
+    "public/hb_convo_pruned_report_macros.html": {
+        "version_id": 11,
+        "version_string": "2.5.1",
+        "hash": "ff38ceda3315b388b1994ed1f7e7b0b3"
     },
     "public/hb_convo_rejoin_confirm.html": {
         "version_id": 8,

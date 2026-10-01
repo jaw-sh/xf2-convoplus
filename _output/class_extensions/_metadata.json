@@ -1,4 +1,10 @@
 {
+    "HappyBoard-ConvoPlus-ModeratorLog-Conversation_HappyBoard-ConvoPlus-XF-ModeratorLog-Conversation.json": {
+        "hash": "dc7e324154f59072da7165ff7768015f"
+    },
+    "XF-Admin-Controller-LogController_HappyBoard-ConvoPlus-XF-Admin-Controller-LogController.json": {
+        "hash": "395863425ed0c2417c695b89ff5fb6f5"
+    },
     "XF-Alert-ConversationMessageHandler_HappyBoard-ConvoPlus-XF-Alert-ConversationMessageHandler.json": {
         "hash": "e23631fb41abdaca9ebdf7af75ddd14b"
     },
@@ -28,6 +34,12 @@
     },
     "XF-Entity-ConversationUser_HappyBoard-ConvoPlus-XF-Entity-ConversationUser.json": {
         "hash": "49b1687328a880c0a33b4632dcf0054b"
+    },
+    "XF-Entity-ModeratorLog_HappyBoard-ConvoPlus-XF-Entity-ModeratorLog.json": {
+        "hash": "3fae47d89528ed226bfe2a2b9948330e"
+    },
+    "XF-Entity-Report_HappyBoard-ConvoPlus-XF-Entity-Report.json": {
+        "hash": "1ccf6a3d5dcd35543c2287a2d74e32dd"
     },
     "XF-Finder-ConversationRecipientFinder_HappyBoard-ConvoPlus-XF-Finder-ConversationRecipientFinder.json": {
         "hash": "c7d0fd6bfd77289f5ec07ed70944c723"

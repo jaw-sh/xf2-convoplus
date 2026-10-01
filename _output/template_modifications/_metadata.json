@@ -14,6 +14,9 @@
     "public/hb_convo_conversations_popup.json": {
         "hash": "567df2e34a7c4c406b203800ea078e78"
     },
+    "public/hb_convo_pruned_report_list.json": {
+        "hash": "383f05eb0c16511bb6041213a84a72b0"
+    },
     "public/hb_convo_report_view.json": {
         "hash": "e7aea14a23a408d99be9e16e97a9725f"
     }

@@ -1,5 +1,8 @@
 <?php
 
+// XF's exception logger requires a valid address even in a CLI test process.
+$_SERVER['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+
 // Set HB_AUTO_PRUNE_UNIT_ONLY=1 to run pure tests without opening the XF database.
 $xfRoot = getenv('XF_ROOT') ?: dirname(__DIR__, 5);
 $xfLoaded = false;

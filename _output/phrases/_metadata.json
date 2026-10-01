@@ -101,6 +101,12 @@
         "version_string": "2.5.0",
         "hash": "4ff5a24bfda01c1ea2e2002f2a312a16"
     },
+    "hb_convo_prune_cannot_release_hold.txt": {
+        "global_cache": false,
+        "version_id": 11,
+        "version_string": "2.5.1",
+        "hash": "4c29146277b553cf1114fc25e5dabce2"
+    },
     "hb_convo_prune_cannot_restore.txt": {
         "global_cache": false,
         "version_id": 10,
@@ -172,6 +178,12 @@
         "version_id": 10,
         "version_string": "2.5.0",
         "hash": "dcb4b8a24fd3c5e98490d7d37fdca163"
+    },
+    "hb_convo_prune_log_content.txt": {
+        "global_cache": false,
+        "version_id": 11,
+        "version_string": "2.5.1",
+        "hash": "2d2d000204ad2f117f4daac3116c3128"
     },
     "hb_convo_prune_max_per_day.txt": {
         "global_cache": false,
@@ -251,6 +263,12 @@
         "version_string": "2.5.0",
         "hash": "e97e3a76e377dc06914cfa3ad3e6a474"
     },
+    "hb_convo_prune_release_hold.txt": {
+        "global_cache": false,
+        "version_id": 11,
+        "version_string": "2.5.1",
+        "hash": "3b6313462762e2c0964c4927ba88a44a"
+    },
     "hb_convo_prune_reset_breaker.txt": {
         "global_cache": false,
         "version_id": 10,
@@ -292,6 +310,30 @@
         "version_id": 10,
         "version_string": "2.5.0",
         "hash": "ba89be7d70502bfa0095de1294eb3e7b"
+    },
+    "hb_convo_pruned_report_explain.txt": {
+        "global_cache": false,
+        "version_id": 11,
+        "version_string": "2.5.1",
+        "hash": "935bd6affab766257925b49d70f62d0f"
+    },
+    "hb_convo_pruned_report_history.txt": {
+        "global_cache": false,
+        "version_id": 11,
+        "version_string": "2.5.1",
+        "hash": "a8ea38d43ba6a3e0354891d0c19b02f0"
+    },
+    "hb_convo_pruned_report_resolution_required.txt": {
+        "global_cache": false,
+        "version_id": 11,
+        "version_string": "2.5.1",
+        "hash": "a6decfa47ab9de5fb350f01805e2c48b"
+    },
+    "hb_convo_pruned_report_title.txt": {
+        "global_cache": false,
+        "version_id": 11,
+        "version_string": "2.5.1",
+        "hash": "106977c5626f671067cfbe528a1328d1"
     },
     "hb_direct_message_awake.txt": {
         "global_cache": false,

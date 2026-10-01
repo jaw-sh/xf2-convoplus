@@ -36,4 +36,8 @@ $0]]></replace>
 </xf:if>
 ]]></replace>
   </modification>
+  <modification type="public" template="report_list_macros" modification_key="hb_convo_pruned_report_list" description="Show metadata for auto-pruned DM reports without participant identities." execution_order="20" enabled="1" action="preg_replace">
+    <find><![CDATA[/(<xf:macro id="item"[\s\S]*?>)([\s\S]*?)(<\/xf:macro>)/]]></find>
+    <replace><![CDATA[$1<xf:if is="$report.isPrunedConversationReport()"><xf:macro id="hb_convo_pruned_report_macros::item" arg-report="{$report}" /><xf:else />$2</xf:if>$3]]></replace>
+  </modification>
 </template_modifications>

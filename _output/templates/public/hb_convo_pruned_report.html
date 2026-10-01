@@ -1,0 +1,32 @@
+<xf:title>{{ phrase('hb_convo_pruned_report_title', {'id': $metadata.report_id}) }}</xf:title>
+<xf:breadcrumb href="{{ link('reports') }}">{{ phrase('reports') }}</xf:breadcrumb>
+<div class="blockMessage">{{ phrase('hb_convo_pruned_report_explain') }}</div>
+<div class="block"><div class="block-container"><div class="block-body">
+  <xf:formrow label="{{ phrase('hb_convo_prune_id') }}">#{$metadata.conversation_id}</xf:formrow>
+  <xf:formrow label="{{ phrase('status') }}">{$metadata.report_state}</xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_state') }}">{$metadata.prune_state}</xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_hold_reason') }}">{$metadata.hold_reason}</xf:formrow>
+  <xf:formrow label="{{ phrase('created') }}">{{ date_time($metadata.first_report_date) }}</xf:formrow>
+  <xf:formrow label="{{ phrase('updated') }}">{{ date_time($metadata.last_modified_date) }}</xf:formrow>
+  <xf:formrow label="{{ phrase('reports') }}">{$metadata.report_count}</xf:formrow>
+</div></div></div>
+<xf:if is="$history is not empty">
+  <div class="block"><div class="block-container"><h3 class="block-header">{{ phrase('hb_convo_pruned_report_history') }}</h3>
+    <ul class="block-body"><xf:foreach loop="$history" value="$event">
+      <li class="block-row">#{$event.report_comment_id}: {{ date_time($event.comment_date) }} <xf:if is="$event.is_report">{{ phrase('report_noun') }}</xf:if> {$event.state_change}</li>
+    </xf:foreach></ul>
+  </div></div>
+</xf:if>
+<xf:if is="$metadata.report_state == 'open' || $metadata.report_state == 'assigned'">
+  <xf:form action="{{ link('reports/update', {'report_id': $metadata.report_id}) }}" class="block">
+    <div class="block-container"><div class="block-body">
+      <xf:radiorow name="report_state" label="{{ phrase('status') }}">
+        <xf:option value="resolved" selected="true">{{ phrase('report_state.resolved') }}</xf:option>
+        <xf:option value="rejected">{{ phrase('report_state.rejected') }}</xf:option>
+      </xf:radiorow>
+    </div><xf:submitrow icon="save" /></div>
+  </xf:form>
+</xf:if>
+<xf:if is="$canRestore && ($metadata.prune_state == 'pending' || $metadata.prune_state == 'held')">
+  <xf:button href="{{ link_type('admin', 'hb-convo-prune/restore', null, {'conversation_id': $metadata.conversation_id}) }}">{{ phrase('hb_convo_prune_restore') }}</xf:button>
+</xf:if>

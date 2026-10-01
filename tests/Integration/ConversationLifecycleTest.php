@@ -25,16 +25,24 @@ final class ConversationLifecycleTest extends IntegrationTestCase
 
     public function testTheWholeTransitionTripsBeforeHidingAnyConversation(): void
     {
+        $db = \XF::db();
+        $pendingBefore = $db->fetchPairs('SELECT conversation_id, hb_pruned_date FROM xf_conversation_master WHERE hb_pruned_date > 0 ORDER BY conversation_id');
         $users = [$this->fixture->user(), $this->fixture->user()];
+        $ids = [];
         for ($i = 0; $i < 6; $i++)
         {
-            $this->fixture->conversation($users);
+            $ids[] = $this->fixture->conversation($users)['conversation_id'];
         }
         \XF::app()->registry()->set('hbConvoPruneConfig', ['max_per_run' => 5]);
         $result = \XF::service('HappyBoard\ConvoPlus:Prune\Selector')->run();
         self::assertSame('tripped', $result['status']);
         self::assertSame(0, $result['pruned']);
-        self::assertSame(0, (int)\XF::db()->fetchOne('SELECT COUNT(*) FROM xf_conversation_master WHERE hb_pruned_date > 0'));
+        self::assertSame($pendingBefore, $db->fetchPairs('SELECT conversation_id, hb_pruned_date FROM xf_conversation_master WHERE hb_pruned_date > 0 ORDER BY conversation_id'), 'A trip must not hide new conversations or change unrelated pending markers.');
+        foreach ($ids as $id)
+        {
+            self::assertSame(0, (int)$db->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $id));
+            self::assertFalse((bool)$db->fetchOne('SELECT conversation_id FROM xf_hb_convo_prune WHERE conversation_id = ?', $id), 'A tripped transition cannot stage any fixture conversation.');
+        }
         $repo = \XF::repository('HappyBoard\ConvoPlus:Prune');
         self::assertGreaterThan(0, $repo->getConfig()['tripped_date']);
         $repo->resetBreaker();
@@ -130,6 +138,90 @@ final class ConversationLifecycleTest extends IntegrationTestCase
         self::assertSame('cancelled', $purger->purge($conversation['conversation_id'])['status']);
         self::assertSame('cancelled', \XF::repository('HappyBoard\ConvoPlus:Prune')->findRecord($conversation['conversation_id'])['state']);
         self::assertTrue((bool)\XF::db()->fetchOne('SELECT conversation_id FROM xf_conversation_master WHERE conversation_id = ?', $conversation['conversation_id']));
+        self::assertSame(0, (int)\XF::db()->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $conversation['conversation_id']));
+        self::assertSame(\XF::$time, (int)\XF::db()->fetchOne('SELECT hb_prune_clock FROM xf_conversation_master WHERE conversation_id = ?', $conversation['conversation_id']));
+        self::assertSame(1, (int)\XF::db()->fetchOne('SELECT conversations_unread FROM xf_user WHERE user_id = ?', $conversation['users'][0]));
+    }
+
+    #[DataProvider('activityChanges')]
+    public function testPurgeRechecksCurrentInactivityBeforeDeleting(string $change): void
+    {
+        $conversation = $this->fixture->conversation([$this->fixture->user(), $this->fixture->user()]);
+        $id = $conversation['conversation_id'];
+        $this->fixture->pendingConversation($conversation);
+        $attachment = $this->fixture->attachment('conversation_message', $conversation['message_id'], [], true);
+        $this->commitFixture();
+        if ($change === 'inactivity_days')
+        {
+            \XF::repository('HappyBoard\ConvoPlus:Prune')->saveConfig(['inactivity_days' => 90]);
+        }
+        else
+        {
+            \XF::db()->update('xf_conversation_master', [$change => \XF::$time], 'conversation_id = ?', $id);
+        }
+        $purger = \XF::service('HappyBoard\ConvoPlus:Prune\Purger');
+        self::assertSame('not_inactive', $purger->purge($id, true)['reason']);
+        self::assertGreaterThan(0, (int)\XF::db()->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $id), 'Dry-run does not restore the pending marker.');
+        $result = $purger->purge($id);
+        self::assertSame(['status' => 'cancelled', 'reason' => 'not_inactive'], $result);
+        self::assertSame(0, (int)\XF::db()->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $id));
+        self::assertSame('cancelled', \XF::repository('HappyBoard\ConvoPlus:Prune')->findRecord($id)['state']);
+        self::assertTrue((bool)\XF::db()->fetchOne('SELECT message_id FROM xf_conversation_message WHERE message_id = ?', $conversation['message_id']));
+        self::assertTrue((bool)\XF::db()->fetchOne('SELECT attachment_id FROM xf_attachment WHERE attachment_id = ?', $attachment['attachment_id']));
+        foreach ($attachment['paths'] as $path)
+        {
+            self::assertTrue(\XF::fs()->has($path), 'Recent activity retains attachment bytes.');
+        }
+    }
+
+    public static function activityChanges(): array
+    {
+        return [['start_date'], ['last_message_date'], ['hb_prune_clock'], ['inactivity_days']];
+    }
+
+    public function testAutomaticBatchRestoresRecentActivityAndAnOldCancelledMarker(): void
+    {
+        $conversation = $this->fixture->conversation([$this->fixture->user(), $this->fixture->user()]);
+        $this->fixture->pendingConversation($conversation);
+        \XF::db()->update('xf_conversation_master', ['last_message_date' => \XF::$time], 'conversation_id = ?', $conversation['conversation_id']);
+        $cancelled = $this->fixture->conversation([$this->fixture->user(), $this->fixture->user()]);
+        $this->fixture->pendingConversation($cancelled);
+        \XF::db()->update('xf_hb_convo_prune', ['state' => 'cancelled'], 'conversation_id = ?', $cancelled['conversation_id']);
+        $this->commitFixture();
+        $batch = \XF::service('HappyBoard\ConvoPlus:Prune\Purger')->prepareBatch();
+        self::assertSame('ready', $batch['status']);
+        foreach ([$conversation, $cancelled] as $item)
+        {
+            self::assertNotContains($item['conversation_id'], $batch['ids']);
+            self::assertSame(0, (int)\XF::db()->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $item['conversation_id']));
+            self::assertSame('cancelled', \XF::repository('HappyBoard\ConvoPlus:Prune')->findRecord($item['conversation_id'])['state']);
+            self::assertSame(1, (int)\XF::db()->fetchOne('SELECT conversations_unread FROM xf_user WHERE user_id = ?', $item['users'][0]));
+        }
+    }
+
+    public function testPurgeErrorReleaseRequiresTheOwnedStampAndEveryRealHoldToClear(): void
+    {
+        $conversation = $this->fixture->conversation([$this->fixture->user(), $this->fixture->user()]);
+        $id = $conversation['conversation_id'];
+        $this->fixture->pendingConversation($conversation);
+        \XF::db()->update('xf_hb_convo_prune', ['state' => 'held', 'hold_reason' => 'purge_error', 'purge_attempts' => 3], 'conversation_id = ?', $id);
+        $reportId = $this->fixture->report('conversation_message', $conversation['message_id']);
+        $this->commitFixture();
+        $repo = \XF::repository('HappyBoard\ConvoPlus:Prune');
+        self::assertFalse($repo->releaseHold($id));
+        self::assertSame(3, (int)$repo->findRecord($id)['purge_attempts']);
+        \XF::db()->update('xf_report', ['report_state' => 'resolved'], 'report_id = ?', $reportId);
+        $repo->refreshHolds();
+        self::assertSame('held', $repo->findRecord($id)['state'], 'Three failures still require an explicit release.');
+        self::assertTrue($repo->releaseHold($id, $conversation['users'][0]));
+        self::assertSame('pending', $repo->findRecord($id)['state']);
+        self::assertSame(0, (int)$repo->findRecord($id)['purge_attempts']);
+        self::assertSame($conversation['users'][0], (int)\XF::db()->fetchOne("SELECT user_id FROM xf_hb_prune_log WHERE content_type = 'conversation' AND content_id = ? AND action = 'release' ORDER BY log_id DESC LIMIT 1", $id));
+        \XF::db()->update('xf_hb_convo_prune', ['state' => 'held', 'hold_reason' => 'purge_error', 'purge_attempts' => 3], 'conversation_id = ?', $id);
+        \XF::db()->update('xf_conversation_master', ['hb_pruned_date' => 1], 'conversation_id = ?', $id);
+        self::assertFalse($repo->releaseHold($id));
+        self::assertSame('cancelled', $repo->findRecord($id)['state']);
+        self::assertSame(0, (int)\XF::db()->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $id));
     }
 
     public function testPurgeRefusesACallerTransactionAndLeavesRowsAndFilesUntouched(): void
@@ -213,5 +305,33 @@ final class ConversationLifecycleTest extends IntegrationTestCase
         $record = \XF::repository('HappyBoard\ConvoPlus:Prune')->findRecord($conversation['conversation_id']);
         self::assertSame('held', $record['state']);
         self::assertSame('purge_error', $record['hold_reason']);
+    }
+
+    public function testFailureAfterAttachmentEntityDeletionRetainsEveryRowAndFile(): void
+    {
+        $conversation = $this->fixture->conversation([$this->fixture->user(), $this->fixture->user()]);
+        $this->fixture->pendingConversation($conversation);
+        $attachment = $this->fixture->attachment('conversation_message', $conversation['message_id'], [], true);
+        $this->commitFixture();
+        $purger = new class(\XF::app()) extends \HappyBoard\ConvoPlus\Service\Prune\Purger
+        {
+            protected function cleanupContent(int $conversationId, array $messageIds): void
+            {
+                parent::cleanupContent($conversationId, $messageIds);
+                throw new \RuntimeException('Injected failure after attachment entity hooks');
+            }
+        };
+        self::assertSame('error', $purger->purge($conversation['conversation_id'])['status']);
+        self::assertFalse(\XF::db()->inTransaction(), 'Nested entity savepoints must all roll back.');
+        self::assertSame(1, (int)\XF::db()->fetchOne('SELECT attach_count FROM xf_conversation_message WHERE message_id = ?', $conversation['message_id']));
+        self::assertTrue((bool)\XF::db()->fetchOne('SELECT attachment_id FROM xf_attachment WHERE attachment_id = ?', $attachment['attachment_id']));
+        self::assertTrue((bool)\XF::db()->fetchOne('SELECT data_id FROM xf_attachment_data WHERE data_id = ?', $attachment['data_id']));
+        $record = \XF::repository('HappyBoard\ConvoPlus:Prune')->findRecord($conversation['conversation_id']);
+        self::assertSame('pending', $record['state']);
+        self::assertSame(1, (int)$record['purge_attempts']);
+        foreach ($attachment['paths'] as $path)
+        {
+            self::assertTrue(\XF::fs()->has($path), 'A failed content transaction must retain attachment bytes.');
+        }
     }
 }

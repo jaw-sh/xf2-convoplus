@@ -3,6 +3,7 @@
 namespace HappyBoard\ConvoPlus\Cli\Command;
 
 use HappyBoard\Misc\AutoPrune\Policy;
+use HappyBoard\GuestPosts\Prune\Floor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -20,6 +21,23 @@ class PruneStatus extends Command
         $db = $app->db();
         $policy = new Policy($app);
         $output->writeln('Emergency stop: ' . ($policy->isDisabled() ? 'enabled' : 'disabled'));
+        if (class_exists(Floor::class))
+        {
+            $output->writeln('Thread floor code watermarks: thread=' . Floor::THREAD_WATERMARK . ', post=' . Floor::POST_WATERMARK);
+            $pinned = Floor::THREAD_WATERMARK > 0 && Floor::POST_WATERMARK > 0;
+            $output->writeln('Thread floor code pin: ' . ($pinned ? 'pinned' : 'unpinned; copy measured production values before rollout'));
+            try
+            {
+                $watermarks = (new Floor($app))->getWatermarks();
+                $output->writeln('Thread floor effective watermarks: thread=' . $watermarks['thread_id'] . ', post=' . $watermarks['post_id']);
+                $output->writeln('Thread floor guard: ' . ($watermarks['thread_id'] > 0 && $watermarks['post_id'] > 0 ? 'ready' : 'blocked; missing or zero watermarks'));
+            }
+            catch (\Throwable $e)
+            {
+                $output->writeln('Thread floor effective watermarks: unavailable');
+                $output->writeln('Thread floor guard: blocked; ' . $e->getMessage());
+            }
+        }
         foreach (['thread' => 'xf_hb_thread_prune', 'conversation' => 'xf_hb_convo_prune'] AS $type => $table)
         {
             if (!$db->getSchemaManager()->tableExists($table))

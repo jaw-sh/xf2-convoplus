@@ -1,0 +1,9 @@
+{
+    "template": "report_list_macros",
+    "description": "Show metadata for auto-pruned DM reports without participant identities.",
+    "execution_order": 20,
+    "enabled": true,
+    "action": "preg_replace",
+    "find": "/(<xf:macro id=\"item\"[\\s\\S]*?>)([\\s\\S]*?)(<\\/xf:macro>)/",
+    "replace": "$1<xf:if is=\"$report.isPrunedConversationReport()\"><xf:macro id=\"hb_convo_pruned_report_macros::item\" arg-report=\"{$report}\" /><xf:else />$2</xf:if>$3"
+}

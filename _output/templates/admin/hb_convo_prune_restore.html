@@ -18,6 +18,12 @@
     <xf:formrow label="{{ phrase('hb_convo_prune_purge_after') }}">{{ date_time($metadata.purge_after) }}</xf:formrow>
   </div></div></div>
   <xf:if is="($metadata.state == 'pending' || $metadata.state == 'held') AND $metadata.start_date">
+    <xf:if is="$metadata.state == 'held'">
+      <xf:form action="{{ link('hb-convo-prune/release-hold') }}" class="block">
+        <xf:hiddenval name="conversation_id">{$metadata.conversation_id}</xf:hiddenval>
+        <xf:button type="submit">{{ phrase('hb_convo_prune_release_hold') }}</xf:button>
+      </xf:form>
+    </xf:if>
     <xf:form action="{{ link('hb-convo-prune/restore') }}" class="block">
       <xf:hiddenval name="conversation_id">{$metadata.conversation_id}</xf:hiddenval>
       <xf:button type="submit">{{ phrase('restore') }}</xf:button>

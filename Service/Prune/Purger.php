@@ -3,6 +3,7 @@
 namespace HappyBoard\ConvoPlus\Service\Prune;
 
 use HappyBoard\Misc\AutoPrune\Audit;
+use HappyBoard\Misc\AutoPrune\AttachmentCleanup;
 use HappyBoard\Misc\AutoPrune\HoldChecker;
 use HappyBoard\Misc\AutoPrune\Lock;
 use HappyBoard\Misc\AutoPrune\Policy;
@@ -33,8 +34,9 @@ class Purger extends AbstractService
                 INNER JOIN xf_conversation_master AS c ON (c.conversation_id = p.conversation_id)
                 WHERE p.state = 'pending' AND p.purge_after <= ?
                     AND p.pruned_date > 0 AND p.pruned_date = c.hb_pruned_date
+                    AND GREATEST(c.start_date, c.last_message_date, c.hb_prune_clock) < ?
                 ORDER BY p.purge_after, p.conversation_id LIMIT {$limit}
-            ", \XF::$time));
+            ", [\XF::$time, \XF::$time - $config['inactivity_days'] * 86400]));
             if (Policy::exceedsCap(count($ids), 0, $this->purgedToday(), $config['max_per_run'], $config['max_per_day']))
             {
                 $repo->trip('purge_cap', count($ids));
@@ -89,10 +91,12 @@ class Purger extends AbstractService
             // A savepoint commit cannot make file cleanup safe against a caller's outer rollback.
             return ['status' => 'error', 'reason' => 'transaction_active'];
         }
+        $attachmentCleanup = null;
         $db->beginTransaction();
         try
         {
-            $master = $db->fetchRow('SELECT conversation_id, hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ? FOR UPDATE', $conversationId);
+            $master = $db->fetchRow('SELECT conversation_id, hb_pruned_date, start_date, last_message_date, hb_prune_clock
+                FROM xf_conversation_master WHERE conversation_id = ? FOR UPDATE', $conversationId);
             $record = $db->fetchRow('SELECT * FROM xf_hb_convo_prune WHERE conversation_id = ? FOR UPDATE', $conversationId);
             if (!$record || !in_array($record['state'], ['pending', 'held'], true))
             {
@@ -111,6 +115,20 @@ class Purger extends AbstractService
                     $db->rollback();
                 }
                 return ['status' => 'cancelled', 'reason' => 'prune_stamp_changed'];
+            }
+            if (max((int)$master['start_date'], (int)$master['last_message_date'], (int)$master['hb_prune_clock'])
+                >= \XF::$time - $config['inactivity_days'] * 86400)
+            {
+                if (!$dryRun)
+                {
+                    $repo->cancel($conversationId, 'not_inactive');
+                    $db->commit();
+                }
+                else
+                {
+                    $db->rollback();
+                }
+                return ['status' => 'cancelled', 'reason' => 'not_inactive'];
             }
             $hold = (new HoldChecker($this->app))->conversation($conversationId);
             if ($hold || $record['state'] === 'held')
@@ -151,8 +169,8 @@ class Purger extends AbstractService
             }
 
             $messageIds = array_map('intval', $db->fetchAllColumn('SELECT message_id FROM xf_conversation_message WHERE conversation_id = ?', $conversationId));
-            $attachments = $messageIds ? $db->fetchAll('SELECT attachment_id, data_id FROM xf_attachment
-                WHERE content_type = ? AND content_id IN (' . $db->quote($messageIds) . ')', 'conversation_message') : [];
+            $attachments = $messageIds ? $db->fetchAll('SELECT * FROM xf_attachment
+                WHERE content_type = ? AND content_id IN (' . $db->quote($messageIds) . ') FOR UPDATE', 'conversation_message') : [];
             $dataIds = array_values(array_unique(array_column($attachments, 'data_id')));
             $users = $repo->recipientIds($conversationId);
             $counts = [
@@ -161,12 +179,14 @@ class Purger extends AbstractService
                 'reactions' => $messageIds ? (int)$db->fetchOne('SELECT COUNT(*) FROM xf_reaction_content
                     WHERE content_type = ? AND content_id IN (' . $db->quote($messageIds) . ')', 'conversation_message') : 0,
             ];
+            AttachmentCleanup::assertCapabilities($this->app);
             if ($dryRun)
             {
                 $db->rollback();
                 return ['status' => 'would_purge', 'counts' => $counts];
             }
 
+            $attachmentCleanup = AttachmentCleanup::begin($this->app, $attachments);
             foreach ($attachments AS $row)
             {
                 $attachment = $this->em()->find('XF:Attachment', (int)$row['attachment_id']);
@@ -187,21 +207,17 @@ class Purger extends AbstractService
                 'state' => 'purged', 'hold_reason' => '', 'resolved_date' => \XF::$time,
             ], 'conversation_id = ?', $conversationId);
             (new Audit($this->app))->log('conversation', $conversationId, 'purge', $counts);
-            // Persist the retry IDs with the content transaction, before any files are removed.
-            $pendingData = $this->readPendingData();
-            foreach ($dataIds AS $dataId)
-            {
-                $pendingData[(int)$dataId] = \XF::$time;
-            }
-            $this->app->registry()->set('hbConvoPruneOrphanData', $pendingData);
+            // Persist mirror and remote cleanup metadata before committing the content removal.
+            $attachmentCleanup->queue();
             $db->commit();
         }
         catch (\Throwable $e)
         {
             $db->rollbackAll();
+            $this->em()->clearEntityCache();
             \XF::logException($e, false, 'Conversation auto-prune purge failed (' . $conversationId . '): ');
             $record = $repo->findRecord($conversationId);
-            if ($record && in_array($record['state'], ['pending', 'held'], true))
+            if (!$dryRun && $record && in_array($record['state'], ['pending', 'held'], true))
             {
                 $attempts = min(255, (int)$record['purge_attempts'] + 1);
                 $db->update('xf_hb_convo_prune', ['purge_attempts' => $attempts], 'conversation_id = ?', $conversationId);
@@ -212,11 +228,18 @@ class Purger extends AbstractService
             }
             return ['status' => 'error', 'reason' => 'purge_error'];
         }
+        finally
+        {
+            if ($attachmentCleanup)
+            {
+                $attachmentCleanup->close();
+            }
+        }
 
         // File removal cannot be rolled back with SQL. Only remove data after a successful commit.
         try
         {
-            $this->cleanupOrphanData();
+            $attachmentCleanup->cleanup();
         }
         catch (\Throwable $e)
         {
@@ -271,40 +294,12 @@ class Purger extends AbstractService
             return;
         }
         $pending = $this->readPendingData();
-        $checker = new HoldChecker($this->app);
-        foreach (array_keys($pending) AS $dataId)
+        if (!$pending)
         {
-            $this->db()->beginTransaction();
-            try
-            {
-                $row = $this->db()->fetchRow('SELECT * FROM xf_attachment_data WHERE data_id = ? FOR UPDATE', (int)$dataId);
-                if (!$row || (int)$row['attach_count'] !== 0
-                    || $this->db()->fetchOne('SELECT attachment_id FROM xf_attachment WHERE data_id = ? LIMIT 1', (int)$dataId))
-                {
-                    $this->db()->rollback();
-                    // Attached/preserved data is deliberately retained, rather than repeatedly attempted.
-                    unset($pending[$dataId]);
-                    continue;
-                }
-                if ($checker->attachmentData((int)$dataId))
-                {
-                    $this->db()->rollback();
-                    continue;
-                }
-                $data = $this->em()->find('XF:AttachmentData', (int)$dataId);
-                if ($data && !$data->delete())
-                {
-                    throw new \RuntimeException('Attachment data deletion was refused');
-                }
-                $this->db()->commit();
-                unset($pending[$dataId]);
-            }
-            catch (\Throwable $e)
-            {
-                $this->db()->rollbackAll();
-                \XF::logException($e, false, 'Conversation auto-prune attachment data cleanup failed (' . (int)$dataId . '): ');
-            }
+            return;
         }
+        $result = AttachmentCleanup::cleanupDataIds($this->app, array_keys($pending));
+        $pending = array_intersect_key($pending, array_fill_keys($result['failed'], true));
         $this->app->registry()->set('hbConvoPruneOrphanData', $pending);
     }
 

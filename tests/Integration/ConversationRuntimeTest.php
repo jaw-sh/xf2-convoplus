@@ -12,6 +12,7 @@ use XF\Mvc\Reply\AbstractReply;
 use XF\Mvc\Reply\Exception as ReplyException;
 use XF\Mvc\Reply\Redirect;
 use XF\Mvc\Reply\View;
+use HappyBoard\Misc\AutoPrune\HoldChecker;
 
 /** Actual XF extension chains, finders, controllers and compiled ACP templates. */
 final class ConversationRuntimeTest extends IntegrationTestCase
@@ -68,6 +69,14 @@ final class ConversationRuntimeTest extends IntegrationTestCase
             'is_super_admin' => $super ? 1 : 0, 'extra_user_group_ids' => '[]',
         ]);
         \XF::db()->update('xf_user', ['is_admin' => 1], 'user_id = ?', $userId);
+    }
+
+    private function makeModerator(int $userId): void
+    {
+        $combination = $this->fixture->insert('xf_permission_combination', [
+            'user_id' => $userId, 'user_group_list' => '2', 'cache_value' => json_encode(['general' => ['warn' => true]]),
+        ]);
+        \XF::db()->update('xf_user', ['is_moderator' => 1, 'permission_combination_id' => $combination], 'user_id = ?', $userId);
     }
 
     public function testPendingConversationReturns410ForParticipantPermissionHolderAndSuperAdmin(): void
@@ -210,7 +219,7 @@ final class ConversationRuntimeTest extends IntegrationTestCase
         self::assertTrue(\XF::visitor()->hasAdminPermission('node'));
         self::assertFalse(\XF::visitor()->hasAdminPermission('hbConvoPrune'));
         $controller = $this->controller(Prune::class);
-        foreach (['Index', 'Save', 'Queue', 'Restore', 'ResetBreaker', 'Preview', 'Log'] as $action)
+        foreach (['Index', 'Save', 'Queue', 'Restore', 'ReleaseHold', 'ResetBreaker', 'Preview', 'Log'] as $action)
         {
             $this->assertDenied(fn() => $this->invoke($controller, 'preDispatchController', [
                 $action, new ParameterBag(),
@@ -294,5 +303,146 @@ final class ConversationRuntimeTest extends IntegrationTestCase
         self::assertFalse($report->canView());
         self::assertSame('', $report->getContentMessage());
         self::assertStringNotContainsString('PRIVATE REPORTED TITLE', (string)$report->getTitle());
+    }
+
+    public function testPendingReportCanBeResolvedThroughMetadataWithoutExposingSnapshotsOrParticipants(): void
+    {
+        $users = [$this->fixture->user('ReportAuthor'), $this->fixture->user('Reporter')];
+        $moderator = $this->fixture->user('ReportResolver');
+        $this->makeModerator($moderator);
+        $conversation = $this->fixture->conversation($users);
+        $reportId = $this->fixture->report('conversation_message', $conversation['message_id']);
+        $author = (string)\XF::db()->fetchOne('SELECT username FROM xf_user WHERE user_id = ?', $users[0]);
+        $reporter = (string)\XF::db()->fetchOne('SELECT username FROM xf_user WHERE user_id = ?', $users[1]);
+        \XF::db()->update('xf_report', [
+            'content_user_id' => $users[0], 'report_count' => 1,
+            'content_info' => json_encode([
+                'conversation_id' => $conversation['conversation_id'], 'conversation_title' => 'PRIVATE REPORT TITLE',
+                'message' => 'PRIVATE REPORT BODY', 'user_id' => $users[0], 'username' => $author,
+            ]),
+        ], 'report_id = ?', $reportId);
+        $commentId = $this->fixture->insert('xf_report_comment', [
+            'report_id' => $reportId, 'user_id' => $users[1], 'username' => $reporter,
+            'comment_date' => \XF::$time - 10, 'message' => 'PRIVATE HISTORY QUOTE', 'is_report' => 1,
+        ]);
+        $this->fixture->pendingConversation($conversation, ['state' => 'held', 'hold_reason' => 'report']);
+        $this->visit($moderator);
+        self::assertTrue(\XF::visitor()->hasPermission('general', 'warn'));
+        $controller = $this->controller('XF\\Pub\\Controller\\ReportController');
+        $params = new ParameterBag(['report_id' => $reportId]);
+        $this->invoke($controller, 'preDispatchController', ['View', $params]);
+        $reply = $controller->actionView($params);
+        self::assertInstanceOf(View::class, $reply);
+        self::assertSame('hb_convo_pruned_report', $reply->getTemplateName());
+        self::assertNull($reply->getParam('report'), 'The metadata view must not receive the private snapshot entity.');
+        self::assertSame($reportId, (int)$reply->getParam('metadata')['report_id']);
+        self::assertSame($commentId, (int)$reply->getParam('history')[0]['report_comment_id']);
+        $html = \XF::app()->templater()->renderTemplate('public:' . $reply->getTemplateName(), $reply->getParams());
+        self::assertStringContainsString('report_state', $html, 'Keep the resolution controls available.');
+        foreach (['PRIVATE REPORT TITLE', 'PRIVATE REPORT BODY', 'PRIVATE HISTORY QUOTE', $author, $reporter] as $secret)
+        {
+            self::assertStringNotContainsString($secret, $html);
+            self::assertStringNotContainsString($secret, json_encode($reply->getParams()));
+        }
+        $report = \XF::em()->find('XF:Report', $reportId);
+        $list = \XF::app()->templater()->renderMacro('public:report_list_macros', 'item', ['report' => $report], []);
+        foreach ([$author, $reporter, 'PRIVATE REPORT TITLE', 'PRIVATE REPORT BODY'] as $secret)
+        {
+            self::assertStringNotContainsString($secret, $list);
+        }
+        self::assertNotNull((new HoldChecker(\XF::app()))->conversation($conversation['conversation_id']));
+        $post = $this->controller('XF\\Pub\\Controller\\ReportController', [
+            'report_state' => 'resolved', 'message' => 'MUST NOT BE SAVED', 'send_alert' => 1,
+        ], 'POST');
+        self::assertInstanceOf(Redirect::class, $post->actionUpdate($params));
+        self::assertSame('resolved', \XF::db()->fetchOne('SELECT report_state FROM xf_report WHERE report_id = ?', $reportId));
+        self::assertSame('', \XF::db()->fetchOne('SELECT message FROM xf_report_comment WHERE report_id = ? ORDER BY report_comment_id DESC LIMIT 1', $reportId));
+        self::assertNull((new HoldChecker(\XF::app()))->conversation($conversation['conversation_id']));
+        \XF::repository('HappyBoard\\ConvoPlus:Prune')->refreshHolds();
+        self::assertSame('pending', \XF::repository('HappyBoard\\ConvoPlus:Prune')->findRecord($conversation['conversation_id'])['state']);
+        self::assertSame('PRIVATE HISTORY QUOTE', \XF::db()->fetchOne('SELECT message FROM xf_report_comment WHERE report_comment_id = ?', $commentId));
+    }
+
+    public function testModeratorLogListAndDetailHidePendingAndPurgedContentAndRetainStoredAudit(): void
+    {
+        $users = [$this->fixture->user('LogAuthor'), $this->fixture->user('LogRecipient')];
+        $admin = $this->fixture->user('LogAdmin');
+        $this->makeAdmin($admin, ['viewLogs' => true]);
+        $conversation = $this->fixture->conversation($users);
+        $author = (string)\XF::db()->fetchOne('SELECT username FROM xf_user WHERE user_id = ?', $users[0]);
+        $logId = $this->fixture->insert('xf_moderator_log', [
+            'user_id' => $admin, 'log_date' => \XF::$time, 'content_type' => 'conversation',
+            'content_id' => $conversation['conversation_id'], 'content_user_id' => $users[0],
+            'content_username' => $author, 'content_title' => 'PRIVATE LOG TITLE',
+            'content_url' => 'direct-messages/PRIVATE-URL', 'discussion_content_type' => 'conversation',
+            'discussion_content_id' => $conversation['conversation_id'], 'action' => 'force_join',
+            'action_params' => json_encode(['report_id' => 321, 'previous_state' => 'none', 'title' => 'PRIVATE PARAM TITLE']),
+        ]);
+        $this->fixture->pendingConversation($conversation);
+        foreach (['pending', 'purged'] as $state)
+        {
+            \XF::db()->update('xf_hb_convo_prune', ['state' => $state], 'conversation_id = ?', $conversation['conversation_id']);
+            if ($state === 'purged')
+            {
+                \XF::db()->delete('xf_conversation_master', 'conversation_id = ?', $conversation['conversation_id']);
+            }
+            $this->visit($admin);
+            $controller = $this->controller('XF\\Admin\\Controller\\LogController', ['user_id' => $admin]);
+            foreach ([new ParameterBag(['moderator_log_id' => $logId]), new ParameterBag()] as $params)
+            {
+                $reply = $controller->actionModerator($params);
+                self::assertInstanceOf(View::class, $reply);
+                $html = \XF::app()->templater()->renderTemplate('admin:' . $reply->getTemplateName(), $reply->getParams());
+                self::assertNotSame('', trim($html), 'Compile the core moderator log templates before running this rendering regression.');
+                foreach (['PRIVATE LOG TITLE', 'PRIVATE PARAM TITLE', 'PRIVATE-URL', $author] as $secret)
+                {
+                    self::assertStringNotContainsString($secret, $html);
+                }
+                self::assertStringContainsString('321', $html, 'Retain the force-join report ID in the action audit.');
+            }
+            $log = \XF::em()->find('XF:ModeratorLog', $logId);
+            self::assertStringNotContainsString('PRIVATE LOG TITLE', (string)$log->content_title);
+            $raw = \XF::db()->fetchRow('SELECT content_title, content_username, action_params FROM xf_moderator_log WHERE moderator_log_id = ?', $logId);
+            self::assertSame('PRIVATE LOG TITLE', $raw['content_title']);
+            self::assertSame($author, $raw['content_username']);
+            self::assertSame('PRIVATE PARAM TITLE', json_decode($raw['action_params'], true)['title']);
+        }
+    }
+
+    public function testPendingAssertionsDoNotPreloadPrivateMessageRows(): void
+    {
+        $users = [$this->fixture->user('PreloadA'), $this->fixture->user('PreloadB')];
+        $conversation = $this->fixture->conversation($users);
+        $this->fixture->pendingConversation($conversation);
+        $this->visit($users[0]);
+        $public = $this->controller('XF\\Pub\\Controller\\ConversationController');
+        $api = $this->controller('XF\\Api\\Controller\\ConversationMessageController');
+        $db = \XF::db();
+        $wasLogged = $db->areQueriesLogged();
+        $db->logQueries(true);
+        $before = count($db->getQueryLog());
+        try
+        {
+            $this->assertDenied(fn() => $this->invoke($public, 'assertViewableUserConversation', [
+                $conversation['conversation_id'], ['Master.FirstMessage.User', 'Master.LastMessage.User', 'Master.Starter'],
+            ]), 410);
+            $this->assertDenied(fn() => $this->invoke($api, 'assertViewableMessage', [
+                $conversation['message_id'], ['Conversation.FirstMessage', 'User'],
+            ]), 410);
+            $queries = array_slice($db->getQueryLog(), $before);
+            self::assertNotEmpty($queries);
+            foreach ($queries as $query)
+            {
+                if (str_contains($query['query'], 'xf_conversation_message'))
+                {
+                    self::assertDoesNotMatchRegularExpression('/(?:SELECT|,)\s+(?:`?\w+`?\.)?\*/i', $query['query']);
+                    self::assertDoesNotMatchRegularExpression('/\.(?:`?message`?)(?:\s|,|$)/i', $query['query']);
+                }
+            }
+        }
+        finally
+        {
+            $db->logQueries($wasLogged);
+        }
     }
 }

@@ -8,6 +8,16 @@
  * @noinspection PhpMultipleClassesDeclarationsInOneFile
  */
 
+namespace HappyBoard\ConvoPlus\XF\ModeratorLog
+{
+	class XFCP_Conversation extends \HappyBoard\ConvoPlus\ModeratorLog\Conversation {}
+}
+
+namespace HappyBoard\ConvoPlus\XF\Admin\Controller
+{
+	class XFCP_LogController extends \XF\Admin\Controller\LogController {}
+}
+
 namespace HappyBoard\ConvoPlus\XF\Alert
 {
 	class XFCP_ConversationMessageHandler extends \XF\Alert\ConversationMessageHandler {}
@@ -32,6 +42,8 @@ namespace HappyBoard\ConvoPlus\XF\Entity
 	class XFCP_ConversationMessage extends \XF\Entity\ConversationMessage {}
 	class XFCP_ConversationRecipient extends \XF\Entity\ConversationRecipient {}
 	class XFCP_ConversationUser extends \XF\Entity\ConversationUser {}
+	class XFCP_ModeratorLog extends \XF\Entity\ModeratorLog {}
+	class XFCP_Report extends \XF\Entity\Report {}
 }
 
 namespace HappyBoard\ConvoPlus\XF\Finder

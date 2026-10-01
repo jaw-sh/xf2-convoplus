@@ -1,0 +1,6 @@
+<xf:macro id="item" arg-report="!">
+  <div class="structItem structItem--report"><div class="structItem-cell structItem-cell--main">
+    <a href="{{ link('reports', $report) }}" class="structItem-title">{{ phrase('hb_convo_pruned_report_title', {'id': $report.report_id}) }}</a>
+    <div class="structItem-minor">{$report.getReportState()} · {{ date_time($report.first_report_date) }}</div>
+  </div><div class="structItem-cell structItem-cell--latest">{{ date_time($report.last_modified_date) }}</div></div>
+</xf:macro>

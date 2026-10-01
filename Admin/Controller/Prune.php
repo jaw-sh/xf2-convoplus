@@ -94,6 +94,17 @@ class Prune extends AbstractController
         return $this->redirect($this->buildLink('hb-convo-prune'));
     }
 
+    public function actionReleaseHold()
+    {
+        $this->assertPostOnly();
+        $id = $this->filter('conversation_id', 'uint');
+        if (!$id || !$this->pruneRepo()->releaseHold($id, \XF::visitor()->user_id))
+        {
+            return $this->error(\XF::phrase('hb_convo_prune_cannot_release_hold'));
+        }
+        return $this->redirect($this->buildLink('hb-convo-prune/restore', null, ['conversation_id' => $id]));
+    }
+
     public function actionPreview()
     {
         $result = $this->service('HappyBoard\\ConvoPlus:Prune\\Selector')->run(true);

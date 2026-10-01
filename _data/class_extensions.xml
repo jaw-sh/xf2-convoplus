@@ -23,4 +23,8 @@
   <extension from_class="XF\Report\ConversationMessageHandler" to_class="HappyBoard\ConvoPlus\XF\Report\ConversationMessageHandler" execute_order="10" active="1"/>
   <extension from_class="XF\Alert\UserHandler" to_class="HappyBoard\ConvoPlus\XF\Alert\UserHandler" execute_order="10" active="1"/>
   <extension from_class="XF\Job\User" to_class="HappyBoard\ConvoPlus\XF\Job\User" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\Report" to_class="HappyBoard\ConvoPlus\XF\Entity\Report" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\ModeratorLog" to_class="HappyBoard\ConvoPlus\XF\Entity\ModeratorLog" execute_order="10" active="1"/>
+  <extension from_class="XF\Admin\Controller\LogController" to_class="HappyBoard\ConvoPlus\XF\Admin\Controller\LogController" execute_order="10" active="1"/>
+  <extension from_class="HappyBoard\ConvoPlus\ModeratorLog\Conversation" to_class="HappyBoard\ConvoPlus\XF\ModeratorLog\Conversation" execute_order="10" active="1"/>
 </class_extensions>
