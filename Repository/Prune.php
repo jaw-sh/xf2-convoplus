@@ -230,9 +230,13 @@ class Prune extends Repository
         }
     }
 
-    public function refreshHolds(): int
+    public function refreshHolds(bool $recoveryOnly = false): int
     {
-        return (int)((new Lock($this->db()))->run('hbConvoPrune', function () {
+        return (int)((new Lock($this->db()))->run('hbConvoPrune', function () use ($recoveryOnly) {
+            if ((new Policy($this->app()))->isDisabled())
+            {
+                return 0;
+            }
             $db = $this->db();
             $changed = 0;
             $checker = new HoldChecker($this->app());
@@ -247,6 +251,11 @@ class Prune extends Repository
                 $db->beginTransaction();
                 try
                 {
+                    if ((new Policy($this->app()))->isDisabled())
+                    {
+                        $db->rollback();
+                        break;
+                    }
                     $master = $db->fetchRow('SELECT conversation_id, hb_pruned_date, start_date, last_message_date, hb_prune_clock
                         FROM xf_conversation_master WHERE conversation_id = ? FOR UPDATE', $id);
                     $record = $db->fetchRow('SELECT * FROM xf_hb_convo_prune WHERE conversation_id = ? FOR UPDATE', $id);
@@ -255,6 +264,8 @@ class Prune extends Repository
                         $db->rollback();
                         continue;
                     }
+                    $activityClock = $master
+                        ? max((int)$master['start_date'], (int)$master['last_message_date'], (int)$master['hb_prune_clock']) : 0;
                     if ($record['state'] === 'cancelled')
                     {
                         if ($master && (int)$master['hb_pruned_date'] > 0)
@@ -268,16 +279,17 @@ class Prune extends Repository
                         $this->cancel($id, 'prune_stamp_changed');
                         $changed++;
                     }
-                    else if (max((int)$master['start_date'], (int)$master['last_message_date'], (int)$master['hb_prune_clock']) >= $cutoff)
+                    else if ($activityClock >= $cutoff || $activityClock >= (int)$record['pruned_date'])
                     {
-                        $this->cancel($id, 'not_inactive');
+                        // Activity since this owned prune invalidates it even after that activity ages past the cutoff.
+                        $this->cancel($id, $activityClock >= $cutoff ? 'not_inactive' : 'activity_after_prune');
                         $changed++;
                     }
-                    else if ($reason = $checker->conversation($id))
+                    else if (!$recoveryOnly && ($reason = $checker->conversation($id)))
                     {
                         $this->setHeld($id, $reason);
                     }
-                    else if ($record['state'] === 'held' && (int)$record['purge_attempts'] < 3)
+                    else if (!$recoveryOnly && $record['state'] === 'held' && (int)$record['purge_attempts'] < 3)
                     {
                         $db->update('xf_hb_convo_prune', ['state' => 'pending', 'hold_reason' => ''], 'conversation_id = ?', $id);
                         (new Audit($this->app()))->log('conversation', $id, 'release');

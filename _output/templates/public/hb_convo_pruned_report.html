@@ -5,7 +5,7 @@
   <xf:formrow label="{{ phrase('hb_convo_prune_id') }}">#{$metadata.conversation_id}</xf:formrow>
   <xf:formrow label="{{ phrase('status') }}">{$metadata.report_state}</xf:formrow>
   <xf:formrow label="{{ phrase('hb_convo_prune_state') }}">{$metadata.prune_state}</xf:formrow>
-  <xf:formrow label="{{ phrase('hb_convo_prune_hold_reason') }}">{$metadata.hold_reason}</xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_hold_reason') }}"><xf:if is="$metadata.has_preservation_hold">{{ phrase('hb_convo_prune_preservation_hold') }}</xf:if></xf:formrow>
   <xf:formrow label="{{ phrase('created') }}">{{ date_time($metadata.first_report_date) }}</xf:formrow>
   <xf:formrow label="{{ phrase('updated') }}">{{ date_time($metadata.last_modified_date) }}</xf:formrow>
   <xf:formrow label="{{ phrase('reports') }}">{$metadata.report_count}</xf:formrow>

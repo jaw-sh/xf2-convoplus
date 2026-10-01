@@ -75,4 +75,5 @@ Quotes your message in a direct message]]></phrase>
   <phrase title="hb_convo_prune_log_content" version_id="11" version_string="2.5.1"><![CDATA[Auto-pruned direct message #{id}]]></phrase>
   <phrase title="hb_convo_prune_release_hold" version_id="11" version_string="2.5.1"><![CDATA[Release hold]]></phrase>
   <phrase title="hb_convo_prune_cannot_release_hold" version_id="11" version_string="2.5.1"><![CDATA[This hold cannot be released. Review its current legal or report holds and prune stamp.]]></phrase>
+  <phrase title="hb_convo_prune_preservation_hold" version_id="12" version_string="2.5.2"><![CDATA[Preservation hold]]></phrase>
 </phrases>

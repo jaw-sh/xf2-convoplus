@@ -21,13 +21,14 @@ class Purger extends AbstractService
             }
             $repo = $this->repository('HappyBoard\ConvoPlus:Prune');
             $config = $repo->getConfig();
+            // Repair stale ownership or activity even when destructive processing is frozen.
+            $repo->refreshHolds($config['mode'] !== 'live' || (bool)$config['tripped_date']);
             if ($config['mode'] !== 'live' || $config['tripped_date'])
             {
                 return ['status' => 'frozen', 'ids' => []];
             }
             $this->cleanupOrphanData();
             $repo->extendGrace();
-            $repo->refreshHolds();
             $limit = min($config['max_per_run'], $config['max_per_day']) + 1;
             $ids = array_map('intval', $this->db()->fetchAllColumn("
                 SELECT p.conversation_id FROM xf_hb_convo_prune AS p
@@ -81,10 +82,6 @@ class Purger extends AbstractService
         }
         $repo = $this->repository('HappyBoard\ConvoPlus:Prune');
         $config = $repo->getConfig();
-        if ($config['mode'] !== 'live' || $config['tripped_date'])
-        {
-            return ['status' => 'frozen', 'reason' => $config['tripped_date'] ? 'breaker_tripped' : 'mode_not_live'];
-        }
         $db = $this->db();
         if ($db->inTransaction())
         {
@@ -116,19 +113,26 @@ class Purger extends AbstractService
                 }
                 return ['status' => 'cancelled', 'reason' => 'prune_stamp_changed'];
             }
-            if (max((int)$master['start_date'], (int)$master['last_message_date'], (int)$master['hb_prune_clock'])
-                >= \XF::$time - $config['inactivity_days'] * 86400)
+            $activityClock = max((int)$master['start_date'], (int)$master['last_message_date'], (int)$master['hb_prune_clock']);
+            $activityReason = $activityClock >= \XF::$time - $config['inactivity_days'] * 86400
+                ? 'not_inactive' : ($activityClock >= (int)$record['pruned_date'] ? 'activity_after_prune' : null);
+            if ($activityReason)
             {
                 if (!$dryRun)
                 {
-                    $repo->cancel($conversationId, 'not_inactive');
+                    $repo->cancel($conversationId, $activityReason);
                     $db->commit();
                 }
                 else
                 {
                     $db->rollback();
                 }
-                return ['status' => 'cancelled', 'reason' => 'not_inactive'];
+                return ['status' => 'cancelled', 'reason' => $activityReason];
+            }
+            if ($config['mode'] !== 'live' || $config['tripped_date'])
+            {
+                $db->rollback();
+                return ['status' => 'frozen', 'reason' => $config['tripped_date'] ? 'breaker_tripped' : 'mode_not_live'];
             }
             $hold = (new HoldChecker($this->app))->conversation($conversationId);
             if ($hold || $record['state'] === 'held')

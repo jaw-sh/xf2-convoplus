@@ -199,6 +199,181 @@ final class ConversationLifecycleTest extends IntegrationTestCase
         }
     }
 
+    #[DataProvider('agedActivityPaths')]
+    public function testActivitySincePruneStillCancelsAfterItAgesPastTheInactivityCutoff(string $field, string $path, bool $sameSecond): void
+    {
+        $old = \XF::$time - 180 * 86400;
+        $stamp = \XF::$time - 91 * 86400;
+        $conversation = $this->fixture->conversation([$this->fixture->user(), $this->fixture->user()], [
+            'start_date' => $old, 'last_message_date' => $old,
+        ]);
+        $id = $conversation['conversation_id'];
+        $this->fixture->pendingConversation($conversation, [
+            'pruned_date' => $stamp, 'purge_after' => $stamp + 90 * 86400,
+        ]);
+        $activity = $sameSecond ? $stamp : $stamp + 86400;
+        \XF::db()->update('xf_conversation_master', ['hb_pruned_date' => $stamp, $field => $activity], 'conversation_id = ?', $id);
+        $attachment = $this->fixture->attachment('conversation_message', $conversation['message_id'], [], true);
+        \XF::repository('HappyBoard\ConvoPlus:Prune')->saveConfig(['grace_days' => 90]);
+        $this->commitFixture();
+        self::assertLessThan(\XF::$time - 30 * 86400, $activity, 'Reproduce activity which has already aged past the current inactivity cutoff.');
+        $purger = \XF::service('HappyBoard\ConvoPlus:Prune\Purger');
+        if ($path === 'manual')
+        {
+            self::assertSame(['status' => 'cancelled', 'reason' => 'activity_after_prune'], $purger->purge($id, true));
+            self::assertSame($stamp, (int)\XF::db()->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $id));
+            self::assertSame(['status' => 'cancelled', 'reason' => 'activity_after_prune'], $purger->purge($id));
+        }
+        elseif ($path === 'batch')
+        {
+            self::assertNotContains($id, $purger->prepareBatch()['ids']);
+        }
+        else
+        {
+            \XF::service('HappyBoard\ConvoPlus:Prune\Selector')->run();
+        }
+        self::assertSame('cancelled', \XF::repository('HappyBoard\ConvoPlus:Prune')->findRecord($id)['state']);
+        self::assertSame(0, (int)\XF::db()->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $id));
+        self::assertSame(\XF::$time, (int)\XF::db()->fetchOne('SELECT hb_prune_clock FROM xf_conversation_master WHERE conversation_id = ?', $id));
+        self::assertSame(1, (int)\XF::db()->fetchOne('SELECT conversations_unread FROM xf_user WHERE user_id = ?', $conversation['users'][0]));
+        self::assertTrue((bool)\XF::db()->fetchOne('SELECT message_id FROM xf_conversation_message WHERE message_id = ?', $conversation['message_id']));
+        self::assertTrue((bool)\XF::db()->fetchOne('SELECT attachment_id FROM xf_attachment WHERE attachment_id = ?', $attachment['attachment_id']));
+        foreach ($attachment['paths'] as $file)
+        {
+            self::assertTrue(\XF::fs()->has($file), 'Activity recovery retains attachment bytes.');
+        }
+    }
+
+    public static function agedActivityPaths(): array
+    {
+        return [
+            ['start_date', 'manual', false], ['last_message_date', 'manual', false], ['hb_prune_clock', 'manual', false],
+            ['last_message_date', 'batch', false], ['last_message_date', 'selector', false],
+            ['last_message_date', 'manual', true], ['last_message_date', 'batch', true],
+        ];
+    }
+
+    #[DataProvider('frozenRecoveryPaths')]
+    public function testOffModeAndBreakerRepairInvalidPrunesWhileKeepingValidPendingAndHeldConversationsFrozen(string $freeze, string $path): void
+    {
+        $repo = \XF::repository('HappyBoard\ConvoPlus:Prune');
+        $recover = [];
+        foreach (['stamp', 'activity', 'cancelled'] as $change)
+        {
+            $conversation = $this->fixture->conversation([$this->fixture->user(), $this->fixture->user()]);
+            $this->fixture->pendingConversation($conversation);
+            if ($change === 'stamp')
+            {
+                \XF::db()->update('xf_conversation_master', ['hb_pruned_date' => 1], 'conversation_id = ?', $conversation['conversation_id']);
+            }
+            elseif ($change === 'activity')
+            {
+                \XF::db()->update('xf_conversation_master', ['last_message_date' => \XF::$time], 'conversation_id = ?', $conversation['conversation_id']);
+            }
+            else
+            {
+                \XF::db()->update('xf_hb_convo_prune', ['state' => 'cancelled'], 'conversation_id = ?', $conversation['conversation_id']);
+            }
+            $recover[$change] = $conversation;
+        }
+        $valid = [];
+        foreach (['pending', 'held'] as $state)
+        {
+            $conversation = $this->fixture->conversation([$this->fixture->user(), $this->fixture->user()]);
+            $this->fixture->pendingConversation($conversation, ['state' => $state, 'hold_reason' => $state === 'held' ? 'ncmec_user' : '']);
+            $valid[$state] = $conversation;
+        }
+        $attachment = $this->fixture->attachment('conversation_message', $valid['pending']['message_id'], [], true);
+        $this->commitFixture();
+        \XF::app()->registry()->set('hbConvoPruneConfig', $freeze === 'off' ? ['mode' => 'off'] : ['tripped_date' => \XF::$time]);
+        $purger = \XF::service('HappyBoard\ConvoPlus:Prune\Purger');
+        if ($path === 'manual')
+        {
+            foreach (['stamp', 'activity'] as $change)
+            {
+                self::assertSame('cancelled', $purger->purge($recover[$change]['conversation_id'])['status']);
+            }
+            unset($recover['cancelled']);
+            foreach ($valid as $item)
+            {
+                self::assertSame('frozen', $purger->purge($item['conversation_id'])['status']);
+            }
+        }
+        elseif ($path === 'batch')
+        {
+            self::assertSame(['status' => 'frozen', 'ids' => []], $purger->prepareBatch());
+        }
+        else
+        {
+            self::assertSame($freeze === 'off' ? 'off' : 'tripped', \XF::service('HappyBoard\ConvoPlus:Prune\Selector')->run()['status']);
+        }
+        foreach ($recover as $item)
+        {
+            self::assertSame('cancelled', $repo->findRecord($item['conversation_id'])['state']);
+            self::assertSame(0, (int)\XF::db()->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $item['conversation_id']));
+            self::assertSame(1, (int)\XF::db()->fetchOne('SELECT conversations_unread FROM xf_user WHERE user_id = ?', $item['users'][0]));
+            self::assertTrue((bool)\XF::db()->fetchOne('SELECT message_id FROM xf_conversation_message WHERE message_id = ?', $item['message_id']));
+        }
+        foreach ($valid as $state => $item)
+        {
+            self::assertSame($state, $repo->findRecord($item['conversation_id'])['state']);
+            self::assertGreaterThan(0, (int)\XF::db()->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $item['conversation_id']));
+            self::assertTrue((bool)\XF::db()->fetchOne('SELECT message_id FROM xf_conversation_message WHERE message_id = ?', $item['message_id']));
+        }
+        self::assertSame('ncmec_user', $repo->findRecord($valid['held']['conversation_id'])['hold_reason'], 'Frozen recovery does not release preservation holds.');
+        self::assertTrue((bool)\XF::db()->fetchOne('SELECT attachment_id FROM xf_attachment WHERE attachment_id = ?', $attachment['attachment_id']));
+        foreach ($attachment['paths'] as $file)
+        {
+            self::assertTrue(\XF::fs()->has($file), 'Frozen processing retains attachment bytes.');
+        }
+    }
+
+    public static function frozenRecoveryPaths(): array
+    {
+        return [['off', 'manual'], ['off', 'batch'], ['off', 'selector'],
+            ['breaker', 'manual'], ['breaker', 'batch'], ['breaker', 'selector']];
+    }
+
+    #[DataProvider('disabledRecoveryGates')]
+    public function testEmergencyStopAndUnavailableDependencyStillFreezeAutomaticAndManualRecovery(string $gate): void
+    {
+        $conversation = $this->fixture->conversation([$this->fixture->user(), $this->fixture->user()]);
+        $this->fixture->pendingConversation($conversation);
+        \XF::db()->update('xf_conversation_master', ['last_message_date' => \XF::$time], 'conversation_id = ?', $conversation['conversation_id']);
+        $this->commitFixture();
+        $dependencyActive = \XF::db()->fetchOne('SELECT active FROM xf_addon WHERE addon_id = ?', 'HappyBoard/Misc');
+        try
+        {
+            if ($gate === 'emergency')
+            {
+                $this->setDisabled(true);
+            }
+            else
+            {
+                \XF::db()->update('xf_addon', ['active' => 0], 'addon_id = ?', 'HappyBoard/Misc');
+            }
+            $purger = \XF::service('HappyBoard\ConvoPlus:Prune\Purger');
+            self::assertSame('disabled', $purger->prepareBatch()['status']);
+            self::assertSame('disabled', $purger->purge($conversation['conversation_id'])['status']);
+            self::assertSame('disabled', \XF::service('HappyBoard\ConvoPlus:Prune\Selector')->run()['status']);
+            self::assertSame(0, \XF::repository('HappyBoard\ConvoPlus:Prune')->refreshHolds());
+            self::assertGreaterThan(0, (int)\XF::db()->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $conversation['conversation_id']));
+            self::assertSame('pending', \XF::repository('HappyBoard\ConvoPlus:Prune')->findRecord($conversation['conversation_id'])['state']);
+        }
+        finally
+        {
+            if ($gate === 'dependency')
+            {
+                \XF::db()->update('xf_addon', ['active' => $dependencyActive], 'addon_id = ?', 'HappyBoard/Misc');
+            }
+        }
+    }
+
+    public static function disabledRecoveryGates(): array
+    {
+        return [['emergency'], ['dependency']];
+    }
+
     public function testPurgeErrorReleaseRequiresTheOwnedStampAndEveryRealHoldToClear(): void
     {
         $conversation = $this->fixture->conversation([$this->fixture->user(), $this->fixture->user()]);

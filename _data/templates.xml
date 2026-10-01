@@ -326,14 +326,14 @@
 </xf:datalist></div>
 <div class="block-outer block-outer--after"><xf:pagenav page="{$page}" perpage="100" total="{$total}" link="hb-convo-prune/log" /></div>
 </div>]]></template>
-  <template type="public" title="hb_convo_pruned_report" version_id="11" version_string="2.5.1"><![CDATA[<xf:title>{{ phrase('hb_convo_pruned_report_title', {'id': $metadata.report_id}) }}</xf:title>
+  <template type="public" title="hb_convo_pruned_report" version_id="12" version_string="2.5.2"><![CDATA[<xf:title>{{ phrase('hb_convo_pruned_report_title', {'id': $metadata.report_id}) }}</xf:title>
 <xf:breadcrumb href="{{ link('reports') }}">{{ phrase('reports') }}</xf:breadcrumb>
 <div class="blockMessage">{{ phrase('hb_convo_pruned_report_explain') }}</div>
 <div class="block"><div class="block-container"><div class="block-body">
   <xf:formrow label="{{ phrase('hb_convo_prune_id') }}">#{$metadata.conversation_id}</xf:formrow>
   <xf:formrow label="{{ phrase('status') }}">{$metadata.report_state}</xf:formrow>
   <xf:formrow label="{{ phrase('hb_convo_prune_state') }}">{$metadata.prune_state}</xf:formrow>
-  <xf:formrow label="{{ phrase('hb_convo_prune_hold_reason') }}">{$metadata.hold_reason}</xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_hold_reason') }}"><xf:if is="$metadata.has_preservation_hold">{{ phrase('hb_convo_prune_preservation_hold') }}</xf:if></xf:formrow>
   <xf:formrow label="{{ phrase('created') }}">{{ date_time($metadata.first_report_date) }}</xf:formrow>
   <xf:formrow label="{{ phrase('updated') }}">{{ date_time($metadata.last_modified_date) }}</xf:formrow>
   <xf:formrow label="{{ phrase('reports') }}">{$metadata.report_count}</xf:formrow>

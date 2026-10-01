@@ -26,6 +26,10 @@ class Selector extends AbstractService
         $repo = $this->repository('HappyBoard\ConvoPlus:Prune');
         $config = $repo->getConfig();
         $result = ['status' => $preview ? 'preview' : $config['mode'], 'candidates' => [], 'held' => [], 'pruned' => 0, 'would_trip' => false];
+        if (!$preview)
+        {
+            $repo->refreshHolds($config['mode'] !== 'live' || (bool)$config['tripped_date']);
+        }
         if (!$preview && ($config['mode'] === 'off' || $config['tripped_date']))
         {
             $result['status'] = $config['tripped_date'] ? 'tripped' : 'off';
@@ -34,7 +38,6 @@ class Selector extends AbstractService
         if (!$preview)
         {
             $repo->extendGrace();
-            $repo->refreshHolds();
         }
 
         $audit = new Audit($this->app);

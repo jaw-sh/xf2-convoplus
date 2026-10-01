@@ -233,6 +233,12 @@
         "version_string": "2.5.0",
         "hash": "11308b28b7a20115aa626758608f40b8"
     },
+    "hb_convo_prune_preservation_hold.txt": {
+        "global_cache": false,
+        "version_id": 12,
+        "version_string": "2.5.2",
+        "hash": "6ea1543cc6650703a7bcf4b3b2d3bb37"
+    },
     "hb_convo_prune_preview.txt": {
         "global_cache": false,
         "version_id": 10,

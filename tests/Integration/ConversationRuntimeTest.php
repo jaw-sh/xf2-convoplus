@@ -13,6 +13,7 @@ use XF\Mvc\Reply\Exception as ReplyException;
 use XF\Mvc\Reply\Redirect;
 use XF\Mvc\Reply\View;
 use HappyBoard\Misc\AutoPrune\HoldChecker;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /** Actual XF extension chains, finders, controllers and compiled ACP templates. */
 final class ConversationRuntimeTest extends IntegrationTestCase
@@ -361,6 +362,43 @@ final class ConversationRuntimeTest extends IntegrationTestCase
         \XF::repository('HappyBoard\\ConvoPlus:Prune')->refreshHolds();
         self::assertSame('pending', \XF::repository('HappyBoard\\ConvoPlus:Prune')->findRecord($conversation['conversation_id'])['state']);
         self::assertSame('PRIVATE HISTORY QUOTE', \XF::db()->fetchOne('SELECT message FROM xf_report_comment WHERE report_comment_id = ?', $commentId));
+    }
+
+    #[DataProvider('sensitiveHoldReasons')]
+    public function testPrunedReportShowsAGenericPreservationHoldWithoutLeakingItsReason(string $reason): void
+    {
+        $users = [$this->fixture->user('HeldAuthor'), $this->fixture->user('HeldRecipient')];
+        $moderator = $this->fixture->user('HeldReportResolver');
+        $this->makeModerator($moderator);
+        $conversation = $this->fixture->conversation($users);
+        $reportId = $this->fixture->report('conversation_message', $conversation['message_id']);
+        \XF::db()->update('xf_report', ['content_info' => json_encode([
+            'conversation_id' => $conversation['conversation_id'],
+            'conversation_title' => 'PRIVATE HELD TITLE', 'message' => 'PRIVATE HELD BODY',
+        ])], 'report_id = ?', $reportId);
+        $this->fixture->pendingConversation($conversation, ['state' => 'held', 'hold_reason' => $reason]);
+        $this->visit($moderator);
+        $controller = $this->controller('XF\\Pub\\Controller\\ReportController');
+        $reply = $controller->actionView(new ParameterBag(['report_id' => $reportId]));
+        self::assertInstanceOf(View::class, $reply);
+        $metadata = $reply->getParam('metadata');
+        self::assertTrue($metadata['has_preservation_hold']);
+        self::assertArrayNotHasKey('hold_reason', $metadata);
+        self::assertFalse($reply->getParam('canRestore'));
+        $html = \XF::app()->templater()->renderTemplate('public:' . $reply->getTemplateName(), $reply->getParams());
+        self::assertStringContainsString('Preservation hold', $html);
+        foreach ([$reason, 'PRIVATE HELD TITLE', 'PRIVATE HELD BODY'] as $secret)
+        {
+            self::assertStringNotContainsString($secret, $html);
+            self::assertStringNotContainsString($secret, json_encode($reply->getParams()));
+        }
+        self::assertSame($reason, \XF::repository('HappyBoard\\ConvoPlus:Prune')->findRecord($conversation['conversation_id'])['hold_reason'],
+            'The report display must preserve the stored hold reason for the permission-gated ACP.');
+    }
+
+    public static function sensitiveHoldReasons(): array
+    {
+        return [['ncmec_user'], ['litigation_user']];
     }
 
     public function testModeratorLogListAndDetailHidePendingAndPurgedContentAndRetainStoredAudit(): void

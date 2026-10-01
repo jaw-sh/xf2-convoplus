@@ -31,3 +31,11 @@ Pending DM reports expose only metadata to authorized report moderators, who can
 Purge rechecks the current inactivity window and clocks under row locks. Changed activity, a longer configured retention period or a cancelled record with a stale hidden marker safely restores accessibility and immunity. The ACP can release a `purge_error` hold only after checking the current ownership stamp and all actual preservation holds again.
 
 Attachment-driven remote media deletion uses Misc's shared durable post-commit cleanup. See the thread guide for the required EphyraMedia adapter, retries and rollout checks.
+
+## Follow-up review — 2026-10-01
+
+The pending-report page now receives only a boolean hold indicator and renders the generic `Preservation hold` phrase. Detailed NCMEC/litigation reasons do not enter its public view parameters.
+
+Inactivity checks compare current activity with the owned prune date as well as the current retention cutoff. Activity at or after pruning cancels ownership even when it has aged past the cutoff during a longer grace period. Off mode and tripped breakers allow stale-marker/activity recovery while keeping valid pending records and holds frozen. The emergency stop and an unavailable Misc dependency still stop all processing.
+
+The frozen suite passed 52 tests and 899 assertions against disposable database `xf_prune_review2`, including actual report rendering and manual/batch/selector recovery paths. `xf-hb:prune-status` also reports aggregate deferred-cleanup item, held, failure and escalation counts without exposing content.

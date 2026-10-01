@@ -3,6 +3,7 @@
 namespace HappyBoard\ConvoPlus\Cli\Command;
 
 use HappyBoard\Misc\AutoPrune\Policy;
+use HappyBoard\Misc\AutoPrune\CleanupRetry;
 use HappyBoard\GuestPosts\Prune\Floor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -73,6 +74,41 @@ class PruneStatus extends Command
         $config = $policy->conversationConfig();
         $output->writeln('Conversation mode: ' . $config['mode']);
         $output->writeln('Conversation breaker: ' . ($config['tripped_date'] ? gmdate('Y-m-d H:i:s', $config['tripped_date']) . ' UTC' : 'clear'));
+        $this->writeCleanupStatus($output);
         return 0;
+    }
+
+    protected function writeCleanupStatus(OutputInterface $output): void
+    {
+        $db = \XF::db();
+        $classes = [
+            'HappyBoard\\Misc:AutoPruneAttachmentCleanup', 'HappyBoard\\Misc\\Job\\AutoPruneAttachmentCleanup',
+            'HappyBoard\\GuestPosts:ThreadPruneAttachmentData', 'HappyBoard\\GuestPosts\\Job\\ThreadPruneAttachmentData',
+            'HappyBoard\\GuestPosts:PruneBannerCleanup', 'HappyBoard\\GuestPosts\\Job\\PruneBannerCleanup',
+        ];
+        $totals = ['jobs' => 0, 'items' => 0, 'failed' => 0, 'held' => 0, 'escalated' => 0, 'invalid' => 0];
+        $lastId = 0;
+        do
+        {
+            // Bound memory use: payloads can contain many durable media snapshots.
+            $rows = $db->fetchAll('SELECT job_id, execute_data FROM xf_job WHERE job_id > ?
+                AND execute_class IN (' . $db->quote($classes) . ') ORDER BY job_id LIMIT 100', $lastId);
+            foreach ($rows AS $row)
+            {
+                $totals['jobs']++;
+                foreach (CleanupRetry::summarizePayload((string) $row['execute_data']) AS $key => $count)
+                {
+                    $totals[$key] += $count;
+                }
+                $lastId = (int) $row['job_id'];
+            }
+        }
+        while (count($rows) === 100);
+        $output->writeln('Deferred cleanup: jobs=' . $totals['jobs'] . ', pending items=' . $totals['items']
+            . ', failing=' . $totals['failed'] . ', held=' . $totals['held'] . ', escalated=' . $totals['escalated']);
+        if ($totals['invalid'])
+        {
+            $output->writeln('Deferred cleanup invalid payloads requiring review: ' . $totals['invalid']);
+        }
     }
 }
