@@ -334,6 +334,56 @@ final class ConversationLifecycleTest extends IntegrationTestCase
             ['breaker', 'manual'], ['breaker', 'batch'], ['breaker', 'selector']];
     }
 
+    #[DataProvider('dryRunHoldRefreshPaths')]
+    public function testDryRunRefreshesCurrentHoldsWithoutHidingOrDeletingConversations(string $path): void
+    {
+        $users = [$this->fixture->user(), $this->fixture->user()];
+        $newHold = $this->fixture->conversation($users);
+        $this->fixture->pendingConversation($newHold);
+        $this->fixture->report('conversation_message', $newHold['message_id']);
+        $released = $this->fixture->conversation($users);
+        $this->fixture->pendingConversation($released, ['state' => 'held', 'hold_reason' => 'report']);
+        $report = $this->fixture->report('conversation_message', $released['message_id']);
+        \XF::db()->update('xf_report', ['report_state' => 'resolved'], 'report_id = ?', $report);
+        $candidate = $this->fixture->conversation($users);
+        $attachment = $this->fixture->attachment('conversation_message', $released['message_id'], [], true);
+        $this->commitFixture();
+        \XF::app()->registry()->set('hbConvoPruneConfig', ['mode' => 'dry_run']);
+
+        if ($path === 'batch')
+        {
+            self::assertSame(['status' => 'frozen', 'ids' => []], \XF::service('HappyBoard\ConvoPlus:Prune\Purger')->prepareBatch());
+        }
+        else
+        {
+            $result = \XF::service('HappyBoard\ConvoPlus:Prune\Selector')->run();
+            self::assertSame('dry_run', $result['status']);
+            self::assertSame(0, $result['pruned']);
+        }
+        $repo = \XF::repository('HappyBoard\ConvoPlus:Prune');
+        self::assertSame('held', $repo->findRecord($newHold['conversation_id'])['state']);
+        self::assertSame('report', $repo->findRecord($newHold['conversation_id'])['hold_reason']);
+        self::assertSame('pending', $repo->findRecord($released['conversation_id'])['state']);
+        self::assertSame('', $repo->findRecord($released['conversation_id'])['hold_reason']);
+        self::assertSame(0, (int)\XF::db()->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $candidate['conversation_id']));
+        self::assertNull($repo->findRecord($candidate['conversation_id']));
+        foreach ([$newHold, $released] as $conversation)
+        {
+            self::assertGreaterThan(0, (int)\XF::db()->fetchOne('SELECT hb_pruned_date FROM xf_conversation_master WHERE conversation_id = ?', $conversation['conversation_id']));
+            self::assertTrue((bool)\XF::db()->fetchOne('SELECT message_id FROM xf_conversation_message WHERE message_id = ?', $conversation['message_id']));
+        }
+        self::assertTrue((bool)\XF::db()->fetchOne('SELECT attachment_id FROM xf_attachment WHERE attachment_id = ?', $attachment['attachment_id']));
+        foreach ($attachment['paths'] as $file)
+        {
+            self::assertTrue(\XF::fs()->has($file), 'Dry-run hold refresh retains attachment bytes.');
+        }
+    }
+
+    public static function dryRunHoldRefreshPaths(): array
+    {
+        return [['selector'], ['batch']];
+    }
+
     #[DataProvider('disabledRecoveryGates')]
     public function testEmergencyStopAndUnavailableDependencyStillFreezeAutomaticAndManualRecovery(string $gate): void
     {

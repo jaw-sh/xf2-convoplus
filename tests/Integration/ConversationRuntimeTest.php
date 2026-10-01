@@ -365,7 +365,7 @@ final class ConversationRuntimeTest extends IntegrationTestCase
     }
 
     #[DataProvider('sensitiveHoldReasons')]
-    public function testPrunedReportShowsAGenericPreservationHoldWithoutLeakingItsReason(string $reason): void
+    public function testPrunedReportRendersTheSamePendingDeletionStatusBeforeAndAfterResolutionRegardlessOfHold(string $reason): void
     {
         $users = [$this->fixture->user('HeldAuthor'), $this->fixture->user('HeldRecipient')];
         $moderator = $this->fixture->user('HeldReportResolver');
@@ -378,19 +378,48 @@ final class ConversationRuntimeTest extends IntegrationTestCase
         ])], 'report_id = ?', $reportId);
         $this->fixture->pendingConversation($conversation, ['state' => 'held', 'hold_reason' => $reason]);
         $this->visit($moderator);
-        $controller = $this->controller('XF\\Pub\\Controller\\ReportController');
-        $reply = $controller->actionView(new ParameterBag(['report_id' => $reportId]));
-        self::assertInstanceOf(View::class, $reply);
-        $metadata = $reply->getParam('metadata');
-        self::assertTrue($metadata['has_preservation_hold']);
-        self::assertArrayNotHasKey('hold_reason', $metadata);
-        self::assertFalse($reply->getParam('canRestore'));
-        $html = \XF::app()->templater()->renderTemplate('public:' . $reply->getTemplateName(), $reply->getParams());
-        self::assertStringContainsString('Preservation hold', $html);
-        foreach ([$reason, 'PRIVATE HELD TITLE', 'PRIVATE HELD BODY'] as $secret)
+        $params = new ParameterBag(['report_id' => $reportId]);
+        $statusHtml = null;
+        foreach (['open', 'resolved'] as $reportState)
         {
-            self::assertStringNotContainsString($secret, $html);
-            self::assertStringNotContainsString($secret, json_encode($reply->getParams()));
+            if ($reportState === 'resolved')
+            {
+                $post = $this->controller('XF\\Pub\\Controller\\ReportController', ['report_state' => 'resolved'], 'POST');
+                self::assertInstanceOf(Redirect::class, $post->actionUpdate($params));
+                \XF::repository('HappyBoard\\ConvoPlus:Prune')->refreshHolds();
+                self::assertSame('resolved', \XF::db()->fetchOne('SELECT report_state FROM xf_report WHERE report_id = ?', $reportId));
+            }
+            $rendered = [];
+            foreach (['pending', 'held'] as $state)
+            {
+                \XF::db()->update('xf_hb_convo_prune', [
+                    'state' => $state, 'hold_reason' => $state === 'held' ? $reason : '',
+                ], 'conversation_id = ?', $conversation['conversation_id']);
+                $this->visit($moderator);
+                $reply = $this->controller('XF\\Pub\\Controller\\ReportController')->actionView($params);
+                self::assertInstanceOf(View::class, $reply);
+                $metadata = $reply->getParam('metadata');
+                self::assertSame([
+                    'report_id', 'conversation_id', 'report_state', 'first_report_date', 'last_modified_date', 'report_count',
+                ], array_keys($metadata), 'Only report metadata may enter the ordinary report view.');
+                self::assertArrayNotHasKey('prune_state', $reply->getParams());
+                self::assertArrayNotHasKey('has_preservation_hold', $reply->getParams());
+                self::assertArrayNotHasKey('hold_reason', $reply->getParams());
+                self::assertFalse($reply->getParam('canRestore'));
+                $html = \XF::app()->templater()->renderTemplate('public:' . $reply->getTemplateName(), $reply->getParams());
+                self::assertStringContainsString('Pending deletion', $html);
+                self::assertStringNotContainsString('Preservation hold', $html);
+                foreach ([$reason, 'PRIVATE HELD TITLE', 'PRIVATE HELD BODY'] as $secret)
+                {
+                    self::assertStringNotContainsString($secret, $html);
+                    self::assertStringNotContainsString($secret, json_encode($reply->getParams()));
+                }
+                self::assertSame(1, preg_match('~<dl\b[^>]*>(?:(?!</dl>).)*Pending deletion(?:(?!</dl>).)*</dl>~s', $html, $match));
+                $rendered[$state] = $match[0];
+                $statusHtml ??= $match[0];
+                self::assertSame($statusHtml, $match[0], 'The rendered deletion status must stay constant after report resolution.');
+            }
+            self::assertSame($rendered['pending'], $rendered['held'], 'The compiled status HTML must not reveal a hold while ' . $reportState . '.');
         }
         self::assertSame($reason, \XF::repository('HappyBoard\\ConvoPlus:Prune')->findRecord($conversation['conversation_id'])['hold_reason'],
             'The report display must preserve the stored hold reason for the permission-gated ACP.');

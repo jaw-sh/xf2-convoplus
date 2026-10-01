@@ -4,8 +4,7 @@
 <div class="block"><div class="block-container"><div class="block-body">
   <xf:formrow label="{{ phrase('hb_convo_prune_id') }}">#{$metadata.conversation_id}</xf:formrow>
   <xf:formrow label="{{ phrase('status') }}">{$metadata.report_state}</xf:formrow>
-  <xf:formrow label="{{ phrase('hb_convo_prune_state') }}">{$metadata.prune_state}</xf:formrow>
-  <xf:formrow label="{{ phrase('hb_convo_prune_hold_reason') }}"><xf:if is="$metadata.has_preservation_hold">{{ phrase('hb_convo_prune_preservation_hold') }}</xf:if></xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_state') }}">{{ phrase('hb_convo_prune_pending_deletion') }}</xf:formrow>
   <xf:formrow label="{{ phrase('created') }}">{{ date_time($metadata.first_report_date) }}</xf:formrow>
   <xf:formrow label="{{ phrase('updated') }}">{{ date_time($metadata.last_modified_date) }}</xf:formrow>
   <xf:formrow label="{{ phrase('reports') }}">{$metadata.report_count}</xf:formrow>
@@ -27,6 +26,6 @@
     </div><xf:submitrow icon="save" /></div>
   </xf:form>
 </xf:if>
-<xf:if is="$canRestore && ($metadata.prune_state == 'pending' || $metadata.prune_state == 'held')">
+<xf:if is="$canRestore">
   <xf:button href="{{ link_type('admin', 'hb-convo-prune/restore', null, {'conversation_id': $metadata.conversation_id}) }}">{{ phrase('hb_convo_prune_restore') }}</xf:button>
 </xf:if>

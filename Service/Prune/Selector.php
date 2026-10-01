@@ -28,7 +28,7 @@ class Selector extends AbstractService
         $result = ['status' => $preview ? 'preview' : $config['mode'], 'candidates' => [], 'held' => [], 'pruned' => 0, 'would_trip' => false];
         if (!$preview)
         {
-            $repo->refreshHolds($config['mode'] !== 'live' || (bool)$config['tripped_date']);
+            $repo->refreshHolds($config['mode'] === 'off' || (bool)$config['tripped_date']);
         }
         if (!$preview && ($config['mode'] === 'off' || $config['tripped_date']))
         {

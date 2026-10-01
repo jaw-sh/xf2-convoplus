@@ -233,6 +233,12 @@
         "version_string": "2.5.0",
         "hash": "11308b28b7a20115aa626758608f40b8"
     },
+    "hb_convo_prune_pending_deletion.txt": {
+        "global_cache": false,
+        "version_id": 13,
+        "version_string": "2.5.3",
+        "hash": "914699699ea8789b2f3de26a891af016"
+    },
     "hb_convo_prune_preservation_hold.txt": {
         "global_cache": false,
         "version_id": 12,

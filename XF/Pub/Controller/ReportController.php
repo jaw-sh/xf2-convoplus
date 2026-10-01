@@ -15,14 +15,11 @@ class ReportController extends XFCP_ReportController
         {
             return parent::actionView($params);
         }
-        $prune = $this->repository('HappyBoard\\ConvoPlus:Prune')->findRecord($id);
-        // Never pass the Report entity, snapshots, participant relations or comment text to this view.
+        // Never pass the Report entity, snapshots, participant relations, comment text or hold metadata to this view.
         $metadata = [
             'report_id' => $report->report_id, 'conversation_id' => $id,
             'report_state' => $report->report_state, 'first_report_date' => $report->first_report_date,
             'last_modified_date' => $report->last_modified_date, 'report_count' => $report->report_count,
-            'prune_state' => $prune['state'] ?? 'pending',
-            'has_preservation_hold' => !empty($prune['hold_reason']),
         ];
         $history = $this->app()->db()->fetchAll('
             SELECT report_comment_id, comment_date, state_change, is_report

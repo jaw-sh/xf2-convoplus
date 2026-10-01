@@ -22,7 +22,7 @@ Before production acceptance, verify a pending DM gives 410 to each participant 
 
 Copied public/CDN attachment and thumbnail URLs bypass PHP permissions. They can remain accessible during grace, including DM attachments. Purge removes origin files; CDN cache invalidation is outside this feature. This is the same residual as thread attachments and must be considered in rollout acceptance.
 
-The original implementation run on 2026-10-01 passed 25 ConvoPlus tests (405 assertions) and a separate CLI uninstall/reinstall round trip. The subsequent review run independently passed all 35 current tests (597 assertions), including real report resolution and moderator-log rendering, inactivity/cancellation recovery, hold release and committed purge/file cleanup fixtures. EphyraMedia and XFMG were active in the isolated database. See GuestPosts `docs/AUTO_PRUNE.md` for the full review validation record and remaining production rollout requirements.
+The original implementation run on 2026-10-01 passed 25 ConvoPlus tests (405 assertions) and a separate CLI uninstall/reinstall round trip. The subsequent review run independently passed all 35 then-current tests (597 assertions), including real report resolution and moderator-log rendering, inactivity/cancellation recovery, hold release and committed purge/file cleanup fixtures. EphyraMedia and XFMG were active in the isolated database. See GuestPosts `docs/AUTO_PRUNE.md` for the full review validation record and remaining production rollout requirements.
 
 ## Review hardening
 
@@ -34,8 +34,10 @@ Attachment-driven remote media deletion uses Misc's shared durable post-commit c
 
 ## Follow-up review — 2026-10-01
 
-The pending-report page now receives only a boolean hold indicator and renders the generic `Preservation hold` phrase. Detailed NCMEC/litigation reasons do not enter its public view parameters.
+The pending-report page shows the constant `Pending deletion` status. Neither prune state nor hold existence enters its public view parameters, including after a moderator resolves the report. Detailed state and hold reasons remain behind the `hbConvoPrune` admin permission in the ACP.
 
-Inactivity checks compare current activity with the owned prune date as well as the current retention cutoff. Activity at or after pruning cancels ownership even when it has aged past the cutoff during a longer grace period. Off mode and tripped breakers allow stale-marker/activity recovery while keeping valid pending records and holds frozen. The emergency stop and an unavailable Misc dependency still stop all processing.
+Inactivity checks compare current activity with the owned prune date as well as the current retention cutoff. Activity at or after pruning cancels ownership even when it has aged past the cutoff during a longer grace period. Off mode and tripped breakers allow stale-marker/activity recovery while keeping valid pending records and holds frozen. Dry-run mode also refreshes pending holds without pruning or purging content. The emergency stop and an unavailable Misc dependency still stop all processing.
 
 The frozen suite passed 52 tests and 899 assertions against disposable database `xf_prune_review2`, including actual report rendering and manual/batch/selector recovery paths. `xf-hb:prune-status` also reports aggregate deferred-cleanup item, held, failure and escalation counts without exposing content.
+
+The next review run passed all 54 tests and 1,056 assertions in isolated `xf_prune_review3`. It compared rendered report status for pending and held DMs before and after report resolution, and exercised hold refresh through both dry-run selector and batch paths. Production transition and acceptance remain outstanding.

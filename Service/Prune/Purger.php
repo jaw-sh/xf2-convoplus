@@ -22,7 +22,7 @@ class Purger extends AbstractService
             $repo = $this->repository('HappyBoard\ConvoPlus:Prune');
             $config = $repo->getConfig();
             // Repair stale ownership or activity even when destructive processing is frozen.
-            $repo->refreshHolds($config['mode'] !== 'live' || (bool)$config['tripped_date']);
+            $repo->refreshHolds($config['mode'] === 'off' || (bool)$config['tripped_date']);
             if ($config['mode'] !== 'live' || $config['tripped_date'])
             {
                 return ['status' => 'frozen', 'ids' => []];
