@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Api\\Controller\\AttachmentController",
+    "to_class": "HappyBoard\\ConvoPlus\\XF\\Api\\Controller\\AttachmentController",
+    "execute_order": 10,
+    "active": true
+}

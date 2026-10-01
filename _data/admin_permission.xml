@@ -1,2 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<admin_permission/>
+<admin_permission>
+  <admin_permission admin_permission_id="hbConvoPrune" display_order="510"/>
+</admin_permission>

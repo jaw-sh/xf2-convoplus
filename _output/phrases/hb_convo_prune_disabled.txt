@@ -1,0 +1,1 @@
+Auto-prune is disabled by the server configuration.

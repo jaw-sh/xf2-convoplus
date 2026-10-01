@@ -1,0 +1,18 @@
+<xf:title>{{ phrase('hb_convo_prune_queue') }}</xf:title>
+<xf:breadcrumb href="{{ link('hb-convo-prune') }}">{{ phrase('hb_convo_prune_title') }}</xf:breadcrumb>
+<div class="blockMessage">{{ phrase('hb_convo_prune_metadata_only') }}</div>
+<xf:if is="$rows is not empty">
+  <div class="block"><div class="block-container"><xf:datalist>
+    <xf:foreach loop="$rows" value="$row">
+      <xf:datarow>
+        <xf:cell href="{{ link('hb-convo-prune/restore', null, {'conversation_id': $row.conversation_id}) }}">#{$row.conversation_id}</xf:cell>
+        <xf:cell>{$row.state}</xf:cell>
+        <xf:cell>{$row.hold_reason}</xf:cell>
+        <xf:cell>{{ date_time($row.purge_after) }}</xf:cell>
+        <xf:action href="{{ link('hb-convo-prune/restore', null, {'conversation_id': $row.conversation_id}) }}">{{ phrase('hb_convo_prune_restore') }}</xf:action>
+      </xf:datarow>
+    </xf:foreach>
+  </xf:datalist></div></div>
+<xf:else />
+  <div class="blockMessage">{{ phrase('hb_convo_prune_no_pending') }}</div>
+</xf:if>

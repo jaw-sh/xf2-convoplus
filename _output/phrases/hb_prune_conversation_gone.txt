@@ -1,0 +1,1 @@
+Direct message #{id} has been auto-pruned and is unavailable. Contact staff with this ID if this was in error.

@@ -1,13 +1,13 @@
 {
     "cron_class": "HappyBoard\\ConvoPlus\\Cron\\ConversationPrune",
-    "cron_method": "deleteOldConversations",
+    "cron_method": "run",
     "run_rules": {
         "day_type": "dom",
         "dom": [
             -1
         ],
         "hours": [
-            2
+            -1
         ],
         "minutes": [
             30

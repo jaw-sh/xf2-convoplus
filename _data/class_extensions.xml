@@ -12,4 +12,15 @@
   <extension from_class="XF\Service\Conversation\MessageManagerService" to_class="HappyBoard\ConvoPlus\XF\Service\Conversation\MessageManagerService" execute_order="10" active="1"/>
   <extension from_class="XF\Service\Conversation\NotifierService" to_class="HappyBoard\ConvoPlus\XF\Service\Conversation\NotifierService" execute_order="10" active="1"/>
   <extension from_class="XF\Service\Conversation\ReplierService" to_class="HappyBoard\ConvoPlus\XF\Service\Conversation\ReplierService" execute_order="10" active="1"/>
+  <extension from_class="XF\Finder\ConversationUserFinder" to_class="HappyBoard\ConvoPlus\XF\Finder\ConversationUserFinder" execute_order="10" active="1"/>
+  <extension from_class="XF\Api\ControllerPlugin\ConversationPlugin" to_class="HappyBoard\ConvoPlus\XF\Api\ControllerPlugin\ConversationPlugin" execute_order="10" active="1"/>
+  <extension from_class="XF\Api\Controller\ConversationMessageController" to_class="HappyBoard\ConvoPlus\XF\Api\Controller\ConversationMessageController" execute_order="10" active="1"/>
+  <extension from_class="XF\Api\Controller\AttachmentController" to_class="HappyBoard\ConvoPlus\XF\Api\Controller\AttachmentController" execute_order="10" active="1"/>
+  <extension from_class="XF\Api\Controller\AttachmentsController" to_class="HappyBoard\ConvoPlus\XF\Api\Controller\AttachmentsController" execute_order="10" active="1"/>
+  <extension from_class="XF\Pub\Controller\AttachmentController" to_class="HappyBoard\ConvoPlus\XF\Pub\Controller\AttachmentController" execute_order="10" active="1"/>
+  <extension from_class="XF\Search\Data\Conversation" to_class="HappyBoard\ConvoPlus\XF\Search\Data\Conversation" execute_order="10" active="1"/>
+  <extension from_class="XF\Search\Data\ConversationMessage" to_class="HappyBoard\ConvoPlus\XF\Search\Data\ConversationMessage" execute_order="10" active="1"/>
+  <extension from_class="XF\Report\ConversationMessageHandler" to_class="HappyBoard\ConvoPlus\XF\Report\ConversationMessageHandler" execute_order="10" active="1"/>
+  <extension from_class="XF\Alert\UserHandler" to_class="HappyBoard\ConvoPlus\XF\Alert\UserHandler" execute_order="10" active="1"/>
+  <extension from_class="XF\Job\User" to_class="HappyBoard\ConvoPlus\XF\Job\User" execute_order="10" active="1"/>
 </class_extensions>

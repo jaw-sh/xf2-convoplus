@@ -8,10 +8,10 @@
 	'name': username_link($user, false, {'defaultname': $alert.username}),
 	'title': '<a href="' . link('direct-messages/replies', $content) . '" class="fauxBlockLink-blockLink">' . $content.Conversation.title . '</a>'
 }) }}]]></template>
-  <template type="public" title="alert_user_conversation_kicked" version_id="2" version_string="2.0.0"><![CDATA[{{ phrase('hb_x_kicked_you_from_direct_message_y', {
+  <template type="public" title="alert_user_conversation_kicked" version_id="2" version_string="2.0.0"><![CDATA[<xf:if is="$extra.conversation_title">{{ phrase('hb_x_kicked_you_from_direct_message_y', {
 	'name': username_link($user, false, {'defaultname': $alert.username}),
 	'title': '<em>' . $extra.conversation_title . '</em>'
-}) }}]]></template>
+}) }}<xf:else />{{ phrase('hb_convo_kicked_notification', {'name': username_link($user, false, {'defaultname': $alert.username})}) }}</xf:if>]]></template>
   <template type="public" title="hb_conversation_sleep" version_id="2" version_string="2.0.0"><![CDATA[<xf:title>{{ $isSleeping ? phrase('hb_wake') : phrase('hb_sleep') }}</xf:title>
 
 <xf:breadcrumb href="{{ link('direct-messages') }}">{{ phrase('direct_messages') }}</xf:breadcrumb>
@@ -223,4 +223,101 @@
 		</xf:if>
 	</xf:if>
 </xf:macro>]]></template>
+  <template type="admin" title="hb_convo_prune_settings" version_id="10" version_string="2.5.0"><![CDATA[<xf:title>{{ phrase('hb_convo_prune_title') }}</xf:title>
+<xf:pageaction>
+  <xf:button href="{{ link('hb-convo-prune/queue') }}">{{ phrase('hb_convo_prune_queue') }}</xf:button>
+  <xf:button href="{{ link('hb-convo-prune/restore') }}">{{ phrase('hb_convo_prune_restore') }}</xf:button>
+  <xf:button href="{{ link('hb-convo-prune/preview') }}">{{ phrase('hb_convo_prune_preview') }}</xf:button>
+  <xf:button href="{{ link('hb-convo-prune/log') }}">{{ phrase('hb_convo_prune_log') }}</xf:button>
+</xf:pageaction>
+<xf:if is="$disabled"><div class="blockMessage blockMessage--warning">{{ phrase('hb_convo_prune_disabled') }}</div></xf:if>
+<xf:if is="$config.tripped_date">
+  <div class="blockMessage blockMessage--error">{{ phrase('hb_convo_prune_breaker_tripped') }} {{ date_time($config.tripped_date) }}</div>
+  <xf:form action="{{ link('hb-convo-prune/reset-breaker') }}" class="block">
+    <xf:button type="submit">{{ phrase('hb_convo_prune_reset_breaker') }}</xf:button>
+  </xf:form>
+</xf:if>
+<xf:form action="{{ link('hb-convo-prune/save') }}" ajax="true" class="block">
+  <div class="block-container"><div class="block-body">
+    <xf:selectrow name="mode" value="{$config.mode}" label="{{ phrase('hb_convo_prune_mode') }}">
+      <xf:option value="off">{{ phrase('hb_convo_prune_off') }}</xf:option>
+      <xf:option value="dry_run">{{ phrase('hb_convo_prune_dry_run') }}</xf:option>
+      <xf:option value="live">{{ phrase('hb_convo_prune_live') }}</xf:option>
+    </xf:selectrow>
+    <xf:numberboxrow name="inactivity_days" value="{$config.inactivity_days}" min="1" label="{{ phrase('hb_convo_prune_inactivity_days') }}" />
+    <xf:numberboxrow name="grace_days" value="{$config.grace_days}" min="1" label="{{ phrase('hb_convo_prune_grace_days') }}" />
+    <xf:numberboxrow name="max_per_run" value="{$config.max_per_run}" min="1" label="{{ phrase('hb_convo_prune_max_per_run') }}" />
+    <xf:numberboxrow name="max_per_day" value="{$config.max_per_day}" min="1" label="{{ phrase('hb_convo_prune_max_per_day') }}" />
+  </div><xf:submitrow icon="save" /></div>
+</xf:form>]]></template>
+  <template type="admin" title="hb_convo_prune_restore" version_id="10" version_string="2.5.0"><![CDATA[<xf:title>{{ phrase('hb_convo_prune_restore') }}</xf:title>
+<xf:breadcrumb href="{{ link('hb-convo-prune') }}">{{ phrase('hb_convo_prune_title') }}</xf:breadcrumb>
+<div class="blockMessage">{{ phrase('hb_convo_prune_metadata_only') }}</div>
+<xf:form action="{{ link('hb-convo-prune/restore') }}" method="get" class="block">
+  <div class="block-container"><div class="block-body">
+    <xf:numberboxrow name="conversation_id" value="{$conversationId}" min="1" label="{{ phrase('hb_convo_prune_id') }}" />
+  </div><xf:submitrow submit="{{ phrase('search') }}" /></div>
+</xf:form>
+<xf:if is="$metadata">
+  <div class="block"><div class="block-container"><div class="block-body">
+    <xf:formrow label="{{ phrase('hb_convo_prune_id') }}">{$metadata.conversation_id}</xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_start_date') }}"><xf:if is="$metadata.start_date">{{ date_time($metadata.start_date) }}</xf:if></xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_last_date') }}"><xf:if is="$metadata.last_message_date">{{ date_time($metadata.last_message_date) }}</xf:if></xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_participant_count') }}">{$metadata.recipient_count}</xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_state') }}">{$metadata.state}</xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_hold_reason') }}">{$metadata.hold_reason}</xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_pruned_date') }}">{{ date_time($metadata.pruned_date) }}</xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_purge_after') }}">{{ date_time($metadata.purge_after) }}</xf:formrow>
+  </div></div></div>
+  <xf:if is="($metadata.state == 'pending' || $metadata.state == 'held') AND $metadata.start_date">
+    <xf:form action="{{ link('hb-convo-prune/restore') }}" class="block">
+      <xf:hiddenval name="conversation_id">{$metadata.conversation_id}</xf:hiddenval>
+      <xf:button type="submit">{{ phrase('restore') }}</xf:button>
+    </xf:form>
+  </xf:if>
+<xf:elseif is="$conversationId" />
+  <div class="blockMessage">{{ phrase('hb_convo_prune_not_found') }}</div>
+</xf:if>]]></template>
+  <template type="admin" title="hb_convo_prune_queue" version_id="10" version_string="2.5.0"><![CDATA[<xf:title>{{ phrase('hb_convo_prune_queue') }}</xf:title>
+<xf:breadcrumb href="{{ link('hb-convo-prune') }}">{{ phrase('hb_convo_prune_title') }}</xf:breadcrumb>
+<div class="blockMessage">{{ phrase('hb_convo_prune_metadata_only') }}</div>
+<xf:if is="$rows is not empty">
+  <div class="block"><div class="block-container"><xf:datalist>
+    <xf:foreach loop="$rows" value="$row">
+      <xf:datarow>
+        <xf:cell href="{{ link('hb-convo-prune/restore', null, {'conversation_id': $row.conversation_id}) }}">#{$row.conversation_id}</xf:cell>
+        <xf:cell>{$row.state}</xf:cell>
+        <xf:cell>{$row.hold_reason}</xf:cell>
+        <xf:cell>{{ date_time($row.purge_after) }}</xf:cell>
+        <xf:action href="{{ link('hb-convo-prune/restore', null, {'conversation_id': $row.conversation_id}) }}">{{ phrase('hb_convo_prune_restore') }}</xf:action>
+      </xf:datarow>
+    </xf:foreach>
+  </xf:datalist></div></div>
+<xf:else />
+  <div class="blockMessage">{{ phrase('hb_convo_prune_no_pending') }}</div>
+</xf:if>]]></template>
+  <template type="admin" title="hb_convo_prune_preview" version_id="10" version_string="2.5.0"><![CDATA[<xf:title>{{ phrase('hb_convo_prune_preview') }}</xf:title>
+<xf:breadcrumb href="{{ link('hb-convo-prune') }}">{{ phrase('hb_convo_prune_title') }}</xf:breadcrumb>
+<div class="blockMessage">{{ phrase('hb_convo_prune_preview_explain') }}</div>
+<div class="block"><div class="block-container"><div class="block-body">
+  <xf:formrow label="{{ phrase('hb_convo_prune_state') }}">{$result.status}</xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_candidates') }}">{$result.candidates}</xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_held') }}">{$result.held}</xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_would_trip') }}">{{ $result.would_trip ? phrase('yes') : phrase('no') }}</xf:formrow>
+</div></div></div>]]></template>
+  <template type="admin" title="hb_convo_prune_log" version_id="10" version_string="2.5.0"><![CDATA[<xf:title>{{ phrase('hb_convo_prune_log') }}</xf:title>
+<xf:breadcrumb href="{{ link('hb-convo-prune') }}">{{ phrase('hb_convo_prune_title') }}</xf:breadcrumb>
+<div class="block"><div class="block-container"><xf:datalist>
+  <xf:foreach loop="$rows" value="$row">
+    <xf:datarow>
+      <xf:cell>{{ date_time($row.log_date) }}</xf:cell>
+      <xf:cell>#{$row.content_id}</xf:cell>
+      <xf:cell>{$row.action}</xf:cell>
+      <xf:cell>#{$row.user_id}</xf:cell>
+      <xf:cell><code>{$row.extra}</code></xf:cell>
+    </xf:datarow>
+  </xf:foreach>
+</xf:datalist></div>
+<div class="block-outer block-outer--after"><xf:pagenav page="{$page}" perpage="100" total="{$total}" link="hb-convo-prune/log" /></div>
+</div>]]></template>
 </templates>

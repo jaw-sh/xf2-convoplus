@@ -1,4 +1,29 @@
 {
+    "admin/hb_convo_prune_log.html": {
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "f1d969931b531146b3b71d5b64a907a9"
+    },
+    "admin/hb_convo_prune_preview.html": {
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "c5aac7dd7d5466348951b83dd11dde70"
+    },
+    "admin/hb_convo_prune_queue.html": {
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "4cd358e354ac637b5ab43c42503568c0"
+    },
+    "admin/hb_convo_prune_restore.html": {
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "7dd6ed2bcff502888e50e226f63bd0c5"
+    },
+    "admin/hb_convo_prune_settings.html": {
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "904b58e1c9d0257ff879a7dc43b331f6"
+    },
     "public/alert_conversation_message_mention.html": {
         "version_id": 4,
         "version_string": "2.2.0",
@@ -12,7 +37,7 @@
     "public/alert_user_conversation_kicked.html": {
         "version_id": 2,
         "version_string": "2.0.0",
-        "hash": "fc00480693dee8d1af9c0397387dab34"
+        "hash": "dafd0fd7099bf03a3b6ccdb904c20bc9"
     },
     "public/hb_conversation_sleep.html": {
         "version_id": 2,

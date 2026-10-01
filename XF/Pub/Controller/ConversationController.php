@@ -10,6 +10,34 @@ use XF\Repository\UserAlertRepository;
 
 class ConversationController extends XFCP_ConversationController
 {
+	protected function assertViewableUserConversation($conversationId, array $extraWith = [])
+	{
+		$conversation = parent::assertViewableUserConversation($conversationId, $extraWith);
+		if ($conversation->Master->isAutoPruned())
+		{
+			throw $this->exception($this->error(\XF::phrase('hb_prune_conversation_gone', [
+				'id' => $conversationId,
+			]), 410));
+		}
+		return $conversation;
+	}
+
+	protected function assertViewableMessage($messageId, array $extraWith = [])
+	{
+		$conversationId = $this->app()->db()->fetchOne('
+			SELECT message.conversation_id FROM xf_conversation_message AS message
+			INNER JOIN xf_conversation_master AS master USING (conversation_id)
+			WHERE message.message_id = ? AND master.hb_pruned_date > 0
+		', $messageId);
+		if ($conversationId)
+		{
+			throw $this->exception($this->error(\XF::phrase('hb_prune_conversation_gone', [
+				'id' => $conversationId,
+			]), 410));
+		}
+		return parent::assertViewableMessage($messageId, $extraWith);
+	}
+
 	public function actionView(ParameterBag $params)
 	{
 		$conversationId = intval($params->conversation_id);
@@ -243,7 +271,7 @@ class ConversationController extends XFCP_ConversationController
                 'user',
                 $visitor->user_id,
                 'conversation_kicked',
-                ['conversation_title' => $conversation->title]
+                ['conversation_title' => $conversation->title, 'conversation_id' => $conversation->conversation_id]
             );
 
 			return $this->redirect($this->buildLink('direct-messages', $conversation));
@@ -284,7 +312,11 @@ class ConversationController extends XFCP_ConversationController
 			throw $this->exception($this->notFound(\XF::phrase('requested_direct_message_not_found')));
 		}
 
-		$conversation = $recipient->Conversation;
+			$conversation = $recipient->Conversation;
+			if ($conversation->isAutoPruned())
+			{
+				return $this->error(\XF::phrase('hb_prune_conversation_gone', ['id' => $conversation->conversation_id]), 410);
+			}
 
 		// Check if the current user was kicked from this conversation
 		if ($recipient && isset($recipient->hb_kicked_by) && $recipient->hb_kicked_by) {

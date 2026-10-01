@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Api\\ControllerPlugin\\ConversationPlugin",
+    "to_class": "HappyBoard\\ConvoPlus\\XF\\Api\\ControllerPlugin\\ConversationPlugin",
+    "execute_order": 10,
+    "active": true
+}

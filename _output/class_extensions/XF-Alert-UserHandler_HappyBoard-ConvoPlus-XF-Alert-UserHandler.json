@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Alert\\UserHandler",
+    "to_class": "HappyBoard\\ConvoPlus\\XF\\Alert\\UserHandler",
+    "execute_order": 10,
+    "active": true
+}

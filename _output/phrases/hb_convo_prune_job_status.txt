@@ -1,0 +1,1 @@
+Purging auto-pruned direct messages ({count} processed)

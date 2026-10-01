@@ -1,1 +1,1 @@
-Autodeletes {lifespan}
+Scheduled deletion {lifespan}

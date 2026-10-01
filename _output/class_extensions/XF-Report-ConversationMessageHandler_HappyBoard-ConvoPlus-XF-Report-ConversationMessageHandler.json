@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Report\\ConversationMessageHandler",
+    "to_class": "HappyBoard\\ConvoPlus\\XF\\Report\\ConversationMessageHandler",
+    "execute_order": 10,
+    "active": true
+}

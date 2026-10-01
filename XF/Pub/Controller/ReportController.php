@@ -26,6 +26,13 @@ class ReportController extends XFCP_ReportController
             return $this->error(\XF::phrase('requested_direct_message_not_found'), 404);
         }
 
+        if ($conversation->isAutoPruned())
+        {
+            return $this->error(\XF::phrase('hb_prune_conversation_gone', [
+                'id' => $conversation->conversation_id,
+            ]), 410);
+        }
+
         /** @var \XF\Entity\ConversationRecipient|null $recipient */
         $recipient = $conversation->Recipients[$visitor->user_id] ?? null;
 

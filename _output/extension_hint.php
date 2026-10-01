@@ -11,6 +11,19 @@
 namespace HappyBoard\ConvoPlus\XF\Alert
 {
 	class XFCP_ConversationMessageHandler extends \XF\Alert\ConversationMessageHandler {}
+	class XFCP_UserHandler extends \XF\Alert\UserHandler {}
+}
+
+namespace HappyBoard\ConvoPlus\XF\Api\ControllerPlugin
+{
+	class XFCP_ConversationPlugin extends \XF\Api\ControllerPlugin\ConversationPlugin {}
+}
+
+namespace HappyBoard\ConvoPlus\XF\Api\Controller
+{
+	class XFCP_AttachmentController extends \XF\Api\Controller\AttachmentController {}
+	class XFCP_AttachmentsController extends \XF\Api\Controller\AttachmentsController {}
+	class XFCP_ConversationMessageController extends \XF\Api\Controller\ConversationMessageController {}
 }
 
 namespace HappyBoard\ConvoPlus\XF\Entity
@@ -24,17 +37,35 @@ namespace HappyBoard\ConvoPlus\XF\Entity
 namespace HappyBoard\ConvoPlus\XF\Finder
 {
 	class XFCP_ConversationRecipientFinder extends \XF\Finder\ConversationRecipientFinder {}
+	class XFCP_ConversationUserFinder extends \XF\Finder\ConversationUserFinder {}
+}
+
+namespace HappyBoard\ConvoPlus\XF\Job
+{
+	class XFCP_User extends \XF\Job\User {}
 }
 
 namespace HappyBoard\ConvoPlus\XF\Pub\Controller
 {
+	class XFCP_AttachmentController extends \XF\Pub\Controller\AttachmentController {}
 	class XFCP_ConversationController extends \XF\Pub\Controller\ConversationController {}
 	class XFCP_ReportController extends \XF\Pub\Controller\ReportController {}
+}
+
+namespace HappyBoard\ConvoPlus\XF\Report
+{
+	class XFCP_ConversationMessageHandler extends \XF\Report\ConversationMessageHandler {}
 }
 
 namespace HappyBoard\ConvoPlus\XF\Repository
 {
 	class XFCP_Conversation extends \XF\Repository\Conversation {}
+}
+
+namespace HappyBoard\ConvoPlus\XF\Search\Data
+{
+	class XFCP_Conversation extends \XF\Search\Data\Conversation {}
+	class XFCP_ConversationMessage extends \XF\Search\Data\ConversationMessage {}
 }
 
 namespace HappyBoard\ConvoPlus\XF\Service\Conversation

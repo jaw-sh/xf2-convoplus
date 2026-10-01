@@ -1,0 +1,1 @@
+No prune record was found for this direct message ID.

@@ -1,0 +1,9 @@
+<xf:title>{{ phrase('hb_convo_prune_preview') }}</xf:title>
+<xf:breadcrumb href="{{ link('hb-convo-prune') }}">{{ phrase('hb_convo_prune_title') }}</xf:breadcrumb>
+<div class="blockMessage">{{ phrase('hb_convo_prune_preview_explain') }}</div>
+<div class="block"><div class="block-container"><div class="block-body">
+  <xf:formrow label="{{ phrase('hb_convo_prune_state') }}">{$result.status}</xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_candidates') }}">{$result.candidates}</xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_held') }}">{$result.held}</xf:formrow>
+  <xf:formrow label="{{ phrase('hb_convo_prune_would_trip') }}">{{ $result.would_trip ? phrase('yes') : phrase('no') }}</xf:formrow>
+</div></div></div>

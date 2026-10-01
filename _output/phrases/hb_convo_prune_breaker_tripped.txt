@@ -1,0 +1,1 @@
+Auto-prune is stopped because a limit was exceeded. Review the log and settings before resetting the breaker.

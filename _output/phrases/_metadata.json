@@ -1,4 +1,16 @@
 {
+    "admin_navigation.hbConvoPrune.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "b9e4f3ec090707c01a0cfbafe02dd2d5"
+    },
+    "admin_permission.hbConvoPrune.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "88cfe39e74e72c00db4710b0a0c9781c"
+    },
     "alert_opt_out.conversation_message_mention.txt": {
         "global_cache": false,
         "version_id": 3,
@@ -11,11 +23,11 @@
         "version_string": "2.1.0",
         "hash": "aa0e4d009baadf2a2071b0a2808f21da"
     },
-    "cron_entry.HBConverastionPrune.txt": {
+    "cron_entry.hbConvoPrune.txt": {
         "global_cache": false,
-        "version_id": 0,
-        "version_string": "1.0.0 Alpha",
-        "hash": "d6a1ee5779eb3a54b59df04e26ae491f"
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "6cf91fcefd0de28024d13c0d233774ff"
     },
     "hb_cannot_rejoin_kicked_conversation.txt": {
         "global_cache": false,
@@ -59,17 +71,227 @@
         "version_string": "1.1.0",
         "hash": "5576de1f8514e0a1e30c3099285355ef"
     },
+    "hb_convo_kicked_notification.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "846a8bd419ae232faf330d5d4ede5ed9"
+    },
     "hb_convo_lives_until_x.txt": {
         "global_cache": false,
         "version_id": 1,
-        "version_string": "1.1.0",
-        "hash": "48878bd89f9c1413f700e108bbe53592"
+        "version_string": "2.5.0",
+        "hash": "c69796fa5145161fe676d68bf3b8ae3f"
     },
     "hb_convo_please_confirm_that_you_want_to_force_join.txt": {
         "global_cache": false,
         "version_id": 8,
         "version_string": "2.4.1",
         "hash": "a0df2d185758a9902b827d7038eb6dae"
+    },
+    "hb_convo_prune_breaker_tripped.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "06aeecba732924d5ec1d1b08371e5578"
+    },
+    "hb_convo_prune_candidates.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "4ff5a24bfda01c1ea2e2002f2a312a16"
+    },
+    "hb_convo_prune_cannot_restore.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "2364b82930395c39c80f023f342ad4f0"
+    },
+    "hb_convo_prune_disabled.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "8d81361d5b08ecb061422efa3be6edd5"
+    },
+    "hb_convo_prune_dry_run.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "f65702dc392c69812b82d933aa733fcf"
+    },
+    "hb_convo_prune_grace_days.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "8dddf656d2e6f47461dd56d69afe5851"
+    },
+    "hb_convo_prune_held.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "d7da074dbd23ca992b68207e744fd7d0"
+    },
+    "hb_convo_prune_hold_reason.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "10b0436652cc6f8784fd8b50b9c969dc"
+    },
+    "hb_convo_prune_id.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "914442d963fd680178df974b645e38ea"
+    },
+    "hb_convo_prune_inactivity_days.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "16e6d4d64f6b2faa2e9b4e35f180c1ae"
+    },
+    "hb_convo_prune_job_status.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "3e95a507bae1cf5c4dc2abc92676e4a2"
+    },
+    "hb_convo_prune_last_date.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "97cdb337e7135dc0909145a30252fa40"
+    },
+    "hb_convo_prune_live.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "955ad3298db330b5ee880c2c9e6f23a0"
+    },
+    "hb_convo_prune_log.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "dcb4b8a24fd3c5e98490d7d37fdca163"
+    },
+    "hb_convo_prune_max_per_day.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "4791019bd9ca574973c765e6c07fcb22"
+    },
+    "hb_convo_prune_max_per_run.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "27e4408a6b866295949045a88527cec5"
+    },
+    "hb_convo_prune_metadata_only.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "754cf1c2540b9f7dc48a61215ed7a07d"
+    },
+    "hb_convo_prune_mode.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "650be61892bf690026089544abbd9d26"
+    },
+    "hb_convo_prune_no_pending.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "2b725cbd837d9d6bf4f3008fdf59c537"
+    },
+    "hb_convo_prune_not_found.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "b176cf738428b2e3ecf422adf9ea99e8"
+    },
+    "hb_convo_prune_off.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "d15305d7a4e34e02489c74a5ef542f36"
+    },
+    "hb_convo_prune_participant_count.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "11308b28b7a20115aa626758608f40b8"
+    },
+    "hb_convo_prune_preview.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "7528fd7c87e4074c4e02d4efd9e5be75"
+    },
+    "hb_convo_prune_preview_explain.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "21b72d952074885a69ebbf90eab4b2cf"
+    },
+    "hb_convo_prune_pruned_date.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "41fdf0595453014548559b4754d011bd"
+    },
+    "hb_convo_prune_purge_after.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "1c213dfab05e73c140b7f4eef89f9c01"
+    },
+    "hb_convo_prune_queue.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "e97e3a76e377dc06914cfa3ad3e6a474"
+    },
+    "hb_convo_prune_reset_breaker.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "2e9863dcec5e92261f398897d4be16ec"
+    },
+    "hb_convo_prune_restore.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "4e833703228d55c4d075a1fae26f8f37"
+    },
+    "hb_convo_prune_settings.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "f4f70727dc34561dfde1a3c529b6205c"
+    },
+    "hb_convo_prune_start_date.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "4d34f1097f6c8b9cee28bca8b78bbee9"
+    },
+    "hb_convo_prune_state.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "46a2a41cc6e552044816a2d04634545d"
+    },
+    "hb_convo_prune_title.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "b9e4f3ec090707c01a0cfbafe02dd2d5"
+    },
+    "hb_convo_prune_would_trip.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "ba89be7d70502bfa0095de1294eb3e7b"
     },
     "hb_direct_message_awake.txt": {
         "global_cache": false,
@@ -118,6 +340,18 @@
         "version_id": 2,
         "version_string": "2.0.0",
         "hash": "f2bb261f91a498492daa03469adfb8c7"
+    },
+    "hb_prune_conversation_content_unavailable.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "cc2410dc56c8345c1d5a0285a3190893"
+    },
+    "hb_prune_conversation_gone.txt": {
+        "global_cache": false,
+        "version_id": 10,
+        "version_string": "2.5.0",
+        "hash": "bda899eb89a26b03f4240389f72c4380"
     },
     "hb_rejoin.txt": {
         "global_cache": false,

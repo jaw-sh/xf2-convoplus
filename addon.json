@@ -2,13 +2,15 @@
     "legacy_addon_id": "",
     "title": "Convo+ by HappyBoard",
     "description": "",
-    "version_id": 9,
-    "version_string": "2.4.2",
+    "version_id": 10,
+    "version_string": "2.5.0",
     "dev": "",
     "dev_url": "",
     "faq_url": "",
     "support_url": "",
     "extra_urls": [],
-    "require": [],
+    "require": {
+        "HappyBoard/Misc": [2110000, "HappyBoard Misc 2.11.0+"]
+    },
     "icon": ""
 }

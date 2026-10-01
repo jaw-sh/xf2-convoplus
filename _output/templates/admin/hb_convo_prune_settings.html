@@ -1,0 +1,27 @@
+<xf:title>{{ phrase('hb_convo_prune_title') }}</xf:title>
+<xf:pageaction>
+  <xf:button href="{{ link('hb-convo-prune/queue') }}">{{ phrase('hb_convo_prune_queue') }}</xf:button>
+  <xf:button href="{{ link('hb-convo-prune/restore') }}">{{ phrase('hb_convo_prune_restore') }}</xf:button>
+  <xf:button href="{{ link('hb-convo-prune/preview') }}">{{ phrase('hb_convo_prune_preview') }}</xf:button>
+  <xf:button href="{{ link('hb-convo-prune/log') }}">{{ phrase('hb_convo_prune_log') }}</xf:button>
+</xf:pageaction>
+<xf:if is="$disabled"><div class="blockMessage blockMessage--warning">{{ phrase('hb_convo_prune_disabled') }}</div></xf:if>
+<xf:if is="$config.tripped_date">
+  <div class="blockMessage blockMessage--error">{{ phrase('hb_convo_prune_breaker_tripped') }} {{ date_time($config.tripped_date) }}</div>
+  <xf:form action="{{ link('hb-convo-prune/reset-breaker') }}" class="block">
+    <xf:button type="submit">{{ phrase('hb_convo_prune_reset_breaker') }}</xf:button>
+  </xf:form>
+</xf:if>
+<xf:form action="{{ link('hb-convo-prune/save') }}" ajax="true" class="block">
+  <div class="block-container"><div class="block-body">
+    <xf:selectrow name="mode" value="{$config.mode}" label="{{ phrase('hb_convo_prune_mode') }}">
+      <xf:option value="off">{{ phrase('hb_convo_prune_off') }}</xf:option>
+      <xf:option value="dry_run">{{ phrase('hb_convo_prune_dry_run') }}</xf:option>
+      <xf:option value="live">{{ phrase('hb_convo_prune_live') }}</xf:option>
+    </xf:selectrow>
+    <xf:numberboxrow name="inactivity_days" value="{$config.inactivity_days}" min="1" label="{{ phrase('hb_convo_prune_inactivity_days') }}" />
+    <xf:numberboxrow name="grace_days" value="{$config.grace_days}" min="1" label="{{ phrase('hb_convo_prune_grace_days') }}" />
+    <xf:numberboxrow name="max_per_run" value="{$config.max_per_run}" min="1" label="{{ phrase('hb_convo_prune_max_per_run') }}" />
+    <xf:numberboxrow name="max_per_day" value="{$config.max_per_day}" min="1" label="{{ phrase('hb_convo_prune_max_per_day') }}" />
+  </div><xf:submitrow icon="save" /></div>
+</xf:form>

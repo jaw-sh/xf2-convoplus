@@ -1,0 +1,15 @@
+<xf:title>{{ phrase('hb_convo_prune_log') }}</xf:title>
+<xf:breadcrumb href="{{ link('hb-convo-prune') }}">{{ phrase('hb_convo_prune_title') }}</xf:breadcrumb>
+<div class="block"><div class="block-container"><xf:datalist>
+  <xf:foreach loop="$rows" value="$row">
+    <xf:datarow>
+      <xf:cell>{{ date_time($row.log_date) }}</xf:cell>
+      <xf:cell>#{$row.content_id}</xf:cell>
+      <xf:cell>{$row.action}</xf:cell>
+      <xf:cell>#{$row.user_id}</xf:cell>
+      <xf:cell><code>{$row.extra}</code></xf:cell>
+    </xf:datarow>
+  </xf:foreach>
+</xf:datalist></div>
+<div class="block-outer block-outer--after"><xf:pagenav page="{$page}" perpage="100" total="{$total}" link="hb-convo-prune/log" /></div>
+</div>

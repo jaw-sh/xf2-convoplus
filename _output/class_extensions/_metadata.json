@@ -2,6 +2,21 @@
     "XF-Alert-ConversationMessageHandler_HappyBoard-ConvoPlus-XF-Alert-ConversationMessageHandler.json": {
         "hash": "e23631fb41abdaca9ebdf7af75ddd14b"
     },
+    "XF-Alert-UserHandler_HappyBoard-ConvoPlus-XF-Alert-UserHandler.json": {
+        "hash": "2e64b3d578dadd89c5cea464c2d95ce6"
+    },
+    "XF-Api-Controller-AttachmentController_HappyBoard-ConvoPlus-XF-Api-Controller-AttachmentController.json": {
+        "hash": "92f54b3409276f6a2e8a69fec9ba537d"
+    },
+    "XF-Api-Controller-AttachmentsController_HappyBoard-ConvoPlus-XF-Api-Controller-AttachmentsController.json": {
+        "hash": "66bd7f42be8beb2c177322f9ed03681b"
+    },
+    "XF-Api-Controller-ConversationMessageController_HappyBoard-ConvoPlus-XF-Api-Controller-ConversationMessageController.json": {
+        "hash": "688d1924ce80f7ebbf57cdb74d8ee937"
+    },
+    "XF-Api-ControllerPlugin-ConversationPlugin_HappyBoard-ConvoPlus-XF-Api-ControllerPlugin-ConversationPlugin.json": {
+        "hash": "7266deed4cf3ea829b51e78aa987cab6"
+    },
     "XF-Entity-ConversationMaster_HappyBoard-ConvoPlus-XF-Entity-ConversationMaster.json": {
         "hash": "a9415d0daa405d8dce168e7d3bc53671"
     },
@@ -17,14 +32,32 @@
     "XF-Finder-ConversationRecipientFinder_HappyBoard-ConvoPlus-XF-Finder-ConversationRecipientFinder.json": {
         "hash": "c7d0fd6bfd77289f5ec07ed70944c723"
     },
+    "XF-Finder-ConversationUserFinder_HappyBoard-ConvoPlus-XF-Finder-ConversationUserFinder.json": {
+        "hash": "c57719fc37d3d45e2cf2c47e78209ce3"
+    },
+    "XF-Job-User_HappyBoard-ConvoPlus-XF-Job-User.json": {
+        "hash": "986aa716c1b8d7b099765966e4b0f84e"
+    },
+    "XF-Pub-Controller-AttachmentController_HappyBoard-ConvoPlus-XF-Pub-Controller-AttachmentController.json": {
+        "hash": "853d69b76b7ae508ac83f2144a5dd64f"
+    },
     "XF-Pub-Controller-ConversationController_HappyBoard-ConvoPlus-XF-Pub-Controller-ConversationController.json": {
         "hash": "636fe5444b2da51579ed992b5f7ffe82"
     },
     "XF-Pub-Controller-ReportController_HappyBoard-ConvoPlus-XF-Pub-Controller-ReportController.json": {
         "hash": "00183f52360d192ce7e7dd30d64bf36a"
     },
+    "XF-Report-ConversationMessageHandler_HappyBoard-ConvoPlus-XF-Report-ConversationMessageHandler.json": {
+        "hash": "50380c8795dc3468ddbb49a0a55c6ad9"
+    },
     "XF-Repository-Conversation_HappyBoard-ConvoPlus-XF-Repository-Conversation.json": {
         "hash": "fa27c73423af6e03f6bcacba9ede5654"
+    },
+    "XF-Search-Data-ConversationMessage_HappyBoard-ConvoPlus-XF-Search-Data-ConversationMessage.json": {
+        "hash": "6795a5d3a9edbf3c105e96c872bbf272"
+    },
+    "XF-Search-Data-Conversation_HappyBoard-ConvoPlus-XF-Search-Data-Conversation.json": {
+        "hash": "cb980bd6a934fc0d38884b39746f3e38"
     },
     "XF-Service-Conversation-MessageManagerService_HappyBoard-ConvoPlus-XF-Service-Conversation-MessageManagerService.json": {
         "hash": "50eebe1e11975c96d66bf564c87ea3c5"

@@ -1,0 +1,11 @@
+{
+    "route_type": "admin",
+    "route_prefix": "hb-convo-prune",
+    "sub_name": "",
+    "format": "",
+    "build_class": "",
+    "build_method": "",
+    "controller": "HappyBoard\\ConvoPlus:Prune",
+    "context": "hbConvoPrune",
+    "action_prefix": ""
+}

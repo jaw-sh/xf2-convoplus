@@ -1,0 +1,28 @@
+<xf:title>{{ phrase('hb_convo_prune_restore') }}</xf:title>
+<xf:breadcrumb href="{{ link('hb-convo-prune') }}">{{ phrase('hb_convo_prune_title') }}</xf:breadcrumb>
+<div class="blockMessage">{{ phrase('hb_convo_prune_metadata_only') }}</div>
+<xf:form action="{{ link('hb-convo-prune/restore') }}" method="get" class="block">
+  <div class="block-container"><div class="block-body">
+    <xf:numberboxrow name="conversation_id" value="{$conversationId}" min="1" label="{{ phrase('hb_convo_prune_id') }}" />
+  </div><xf:submitrow submit="{{ phrase('search') }}" /></div>
+</xf:form>
+<xf:if is="$metadata">
+  <div class="block"><div class="block-container"><div class="block-body">
+    <xf:formrow label="{{ phrase('hb_convo_prune_id') }}">{$metadata.conversation_id}</xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_start_date') }}"><xf:if is="$metadata.start_date">{{ date_time($metadata.start_date) }}</xf:if></xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_last_date') }}"><xf:if is="$metadata.last_message_date">{{ date_time($metadata.last_message_date) }}</xf:if></xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_participant_count') }}">{$metadata.recipient_count}</xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_state') }}">{$metadata.state}</xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_hold_reason') }}">{$metadata.hold_reason}</xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_pruned_date') }}">{{ date_time($metadata.pruned_date) }}</xf:formrow>
+    <xf:formrow label="{{ phrase('hb_convo_prune_purge_after') }}">{{ date_time($metadata.purge_after) }}</xf:formrow>
+  </div></div></div>
+  <xf:if is="($metadata.state == 'pending' || $metadata.state == 'held') AND $metadata.start_date">
+    <xf:form action="{{ link('hb-convo-prune/restore') }}" class="block">
+      <xf:hiddenval name="conversation_id">{$metadata.conversation_id}</xf:hiddenval>
+      <xf:button type="submit">{{ phrase('restore') }}</xf:button>
+    </xf:form>
+  </xf:if>
+<xf:elseif is="$conversationId" />
+  <div class="blockMessage">{{ phrase('hb_convo_prune_not_found') }}</div>
+</xf:if>

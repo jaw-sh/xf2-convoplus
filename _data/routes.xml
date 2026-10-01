@@ -1,2 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<routes/>
+<routes>
+  <route route_type="admin" route_prefix="hb-convo-prune" controller="HappyBoard\ConvoPlus:Prune" context="hbConvoPrune"/>
+</routes>

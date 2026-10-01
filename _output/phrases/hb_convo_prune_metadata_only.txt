@@ -1,0 +1,1 @@
+Only metadata is available while a direct message is pruned. Restore it by ID if this was in error.

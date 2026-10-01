@@ -3,7 +3,6 @@
   <phrase title="alert_opt_out.conversation_message_mention" version_id="3" version_string="2.1.0"><![CDATA[Mentions you in a direct message]]></phrase>
   <phrase title="alert_opt_out.conversation_message_quote" version_id="3" version_string="2.1.0"><![CDATA[
 Quotes your message in a direct message]]></phrase>
-  <phrase title="cron_entry.HBConverastionPrune" version_id="0" version_string="1.0.0 Alpha"><![CDATA[Prune old conversations]]></phrase>
   <phrase title="hb_cannot_rejoin_kicked_conversation" version_id="3" version_string="2.1.0"><![CDATA[You are not permitted to rejoin this conversation because you were kicked from it.]]></phrase>
   <phrase title="hb_convo_already_participant_x" version_id="9" version_string="2.4.2"><![CDATA[You are already a participant in this direct message. <a href="{url}">Go to message</a>]]></phrase>
   <phrase title="hb_convo_force_join" version_id="2" version_string="2.0.0"><![CDATA[Join Conversation]]></phrase>
@@ -11,7 +10,7 @@ Quotes your message in a direct message]]></phrase>
   <phrase title="hb_convo_force_join_report_not_open" version_id="9" version_string="2.4.2"><![CDATA[You can only join a direct message from a report that is open or assigned. Reopen the report first if you still need access.]]></phrase>
   <phrase title="hb_convo_invited_by_x" version_id="1" version_string="1.1.0"><![CDATA[Invited by {user}]]></phrase>
   <phrase title="hb_convo_kicked_by_x" version_id="1" version_string="1.1.0"><![CDATA[Kicked by {user}]]></phrase>
-  <phrase title="hb_convo_lives_until_x" version_id="1" version_string="1.1.0"><![CDATA[Autodeletes {lifespan}]]></phrase>
+  <phrase title="hb_convo_lives_until_x" version_id="1" version_string="2.5.0"><![CDATA[Scheduled deletion {lifespan}]]></phrase>
   <phrase title="hb_convo_please_confirm_that_you_want_to_force_join" version_id="8" version_string="2.4.1"><![CDATA[Please confirm that you want to join the following direct message as a participant]]></phrase>
   <phrase title="hb_convo_x_other_participants" version_id="6" version_string="2.3.0"><![CDATA[{count} other participants]]></phrase>
   <phrase title="hb_direct_message_awake" version_id="2" version_string="2.0.0"><![CDATA[Awake to new messages in this chain.]]></phrase>
@@ -29,4 +28,44 @@ Quotes your message in a direct message]]></phrase>
   <phrase title="mod_log.conversation_force_join" version_id="8" version_string="2.4.1"><![CDATA[Force-joined via report #{report_id} (previous state: {previous_state})]]></phrase>
   <phrase title="x_mentioned_you_in_message_in_direct_message_y" version_id="3" version_string="2.1.0"><![CDATA[{name} mentioned you in a message in the direct message {title}.]]></phrase>
   <phrase title="x_quoted_your_message_in_direct_message_y" version_id="3" version_string="2.1.0"><![CDATA[{name} quoted your message in the direct message {title}.]]></phrase>
+  <phrase title="admin_permission.hbConvoPrune" version_id="10" version_string="2.5.0"><![CDATA[Manage direct message auto-prune]]></phrase>
+  <phrase title="admin_navigation.hbConvoPrune" version_id="10" version_string="2.5.0"><![CDATA[Direct message auto-prune]]></phrase>
+  <phrase title="cron_entry.hbConvoPrune" version_id="10" version_string="2.5.0"><![CDATA[Select and purge old direct messages]]></phrase>
+  <phrase title="hb_prune_conversation_gone" version_id="10" version_string="2.5.0"><![CDATA[Direct message #{id} has been auto-pruned and is unavailable. Contact staff with this ID if this was in error.]]></phrase>
+  <phrase title="hb_prune_conversation_content_unavailable" version_id="10" version_string="2.5.0"><![CDATA[Auto-pruned direct message: content unavailable]]></phrase>
+  <phrase title="hb_convo_prune_title" version_id="10" version_string="2.5.0"><![CDATA[Direct message auto-prune]]></phrase>
+  <phrase title="hb_convo_prune_settings" version_id="10" version_string="2.5.0"><![CDATA[Settings]]></phrase>
+  <phrase title="hb_convo_prune_queue" version_id="10" version_string="2.5.0"><![CDATA[Pending and held direct messages]]></phrase>
+  <phrase title="hb_convo_prune_restore" version_id="10" version_string="2.5.0"><![CDATA[Restore a direct message by ID]]></phrase>
+  <phrase title="hb_convo_prune_metadata_only" version_id="10" version_string="2.5.0"><![CDATA[Only metadata is available while a direct message is pruned. Restore it by ID if this was in error.]]></phrase>
+  <phrase title="hb_convo_prune_cannot_restore" version_id="10" version_string="2.5.0"><![CDATA[This direct message cannot be restored. It may have already been purged or its prune state may have changed.]]></phrase>
+  <phrase title="hb_convo_prune_not_found" version_id="10" version_string="2.5.0"><![CDATA[No prune record was found for this direct message ID.]]></phrase>
+  <phrase title="hb_convo_prune_id" version_id="10" version_string="2.5.0"><![CDATA[Direct message ID]]></phrase>
+  <phrase title="hb_convo_prune_inactivity_days" version_id="10" version_string="2.5.0"><![CDATA[Inactivity (days)]]></phrase>
+  <phrase title="hb_convo_prune_grace_days" version_id="10" version_string="2.5.0"><![CDATA[Grace period (days)]]></phrase>
+  <phrase title="hb_convo_prune_max_per_run" version_id="10" version_string="2.5.0"><![CDATA[Maximum per run]]></phrase>
+  <phrase title="hb_convo_prune_max_per_day" version_id="10" version_string="2.5.0"><![CDATA[Maximum per 24 hours]]></phrase>
+  <phrase title="hb_convo_prune_mode" version_id="10" version_string="2.5.0"><![CDATA[Mode]]></phrase>
+  <phrase title="hb_convo_prune_off" version_id="10" version_string="2.5.0"><![CDATA[Off]]></phrase>
+  <phrase title="hb_convo_prune_dry_run" version_id="10" version_string="2.5.0"><![CDATA[Dry run]]></phrase>
+  <phrase title="hb_convo_prune_live" version_id="10" version_string="2.5.0"><![CDATA[Live]]></phrase>
+  <phrase title="hb_convo_prune_start_date" version_id="10" version_string="2.5.0"><![CDATA[Start date]]></phrase>
+  <phrase title="hb_convo_prune_last_date" version_id="10" version_string="2.5.0"><![CDATA[Last message date]]></phrase>
+  <phrase title="hb_convo_prune_participant_count" version_id="10" version_string="2.5.0"><![CDATA[Participant count]]></phrase>
+  <phrase title="hb_convo_prune_state" version_id="10" version_string="2.5.0"><![CDATA[State]]></phrase>
+  <phrase title="hb_convo_prune_hold_reason" version_id="10" version_string="2.5.0"><![CDATA[Hold reason]]></phrase>
+  <phrase title="hb_convo_prune_pruned_date" version_id="10" version_string="2.5.0"><![CDATA[Pruned on]]></phrase>
+  <phrase title="hb_convo_prune_purge_after" version_id="10" version_string="2.5.0"><![CDATA[Purge after]]></phrase>
+  <phrase title="hb_convo_prune_no_pending" version_id="10" version_string="2.5.0"><![CDATA[There are no pending or held direct messages.]]></phrase>
+  <phrase title="hb_convo_prune_breaker_tripped" version_id="10" version_string="2.5.0"><![CDATA[Auto-prune is stopped because a limit was exceeded. Review the log and settings before resetting the breaker.]]></phrase>
+  <phrase title="hb_convo_prune_reset_breaker" version_id="10" version_string="2.5.0"><![CDATA[Reset breaker]]></phrase>
+  <phrase title="hb_convo_prune_disabled" version_id="10" version_string="2.5.0"><![CDATA[Auto-prune is disabled by the server configuration.]]></phrase>
+  <phrase title="hb_convo_prune_log" version_id="10" version_string="2.5.0"><![CDATA[Auto-prune audit log]]></phrase>
+  <phrase title="hb_convo_prune_preview" version_id="10" version_string="2.5.0"><![CDATA[Preview selection]]></phrase>
+  <phrase title="hb_convo_prune_preview_explain" version_id="10" version_string="2.5.0"><![CDATA[This preview does not change any direct messages.]]></phrase>
+  <phrase title="hb_convo_prune_candidates" version_id="10" version_string="2.5.0"><![CDATA[Matching direct messages]]></phrase>
+  <phrase title="hb_convo_prune_held" version_id="10" version_string="2.5.0"><![CDATA[Held direct messages]]></phrase>
+  <phrase title="hb_convo_prune_would_trip" version_id="10" version_string="2.5.0"><![CDATA[Would exceed a limit]]></phrase>
+  <phrase title="hb_convo_kicked_notification" version_id="10" version_string="2.5.0"><![CDATA[{name} kicked you from a direct message.]]></phrase>
+  <phrase title="hb_convo_prune_job_status" version_id="10" version_string="2.5.0"><![CDATA[Purging auto-pruned direct messages ({count} processed)]]></phrase>
 </phrases>

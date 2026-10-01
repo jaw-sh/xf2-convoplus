@@ -3,74 +3,43 @@
 namespace HappyBoard\ConvoPlus\Cli\Command;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
-use XF;
 
 class DestroyConversation extends Command
 {
     protected function configure()
     {
-        $this
-            ->setName('xf-hb:destroy-conversation')
-            ->setDescription('Deletes a conversation chain.')
-            ->addArgument('id', InputArgument::OPTIONAL, 'Thread ID');
+        $this->setName('xf-hb:destroy-conversation')
+            ->setDescription('Purge an auto-pruned conversation after its grace period, with all preservation guards.')
+            ->addArgument('id', InputArgument::REQUIRED, 'Conversation ID')
+            ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Check guards and counts without changing data.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        /** @var QuestionHelper $helper */
-        $helper = $this->getHelper('question');
-
-        $id = $input->getArgument('id');
-
-        /** @var \XF\Finder\ConversationMaster $finder */
-        $finder = XF::app()->finder('XF:ConversationMaster');
-        $finder->where('conversation_id', '=', $id);
-
-        $prevTotal = 0;
-        $newTotal = $finder->total();
-
-        while ($newTotal > 0 && $prevTotal != $newTotal) {
-            $prevTotal = $newTotal;
-
-            $db = XF::db();
-            $db->beginTransaction();
-
-            $isNcmecActive = \XF::isAddOnActive('USIPS/NCMEC');
-
-            foreach ($finder->fetch(10) AS $conversation) {
-                // 18 U.S. Code § 2703
-                if ($isNcmecActive)
-                {
-                    $shouldPreserve = false;
-                    foreach ($conversation->Recipients as $recipient)
-                    {
-                        if (\XF::repository('USIPS\NCMEC:Preservation')->isUserPreserved($recipient->user_id))
-                        {
-                            $shouldPreserve = true;
-                            break;
-                        }
-                    }
-                    
-                    if ($shouldPreserve)
-                    {
-                        $output->writeln("Skipping conversation {$conversation->conversation_id} due to 18 U.S. Code § 2703 preservation hold.");
-                        continue;
-                    }
-                }
-
-                $conversation->delete(false, false);
-            }
-
-            $db->commit();
-            $newTotal = $finder->total();
+        $id = (int)$input->getArgument('id');
+        if ($id < 1)
+        {
+            $output->writeln('<error>A positive conversation ID is required.</error>');
+            return 1;
         }
-
-        return 0;
+        $result = \XF::app()->service('HappyBoard\ConvoPlus:Prune\Purger')->purge($id, (bool)$input->getOption('dry-run'), true);
+        $output->writeln('Conversation ' . $id . ': ' . $result['status'] . (isset($result['reason']) ? ' (' . $result['reason'] . ')' : ''));
+        if (isset($result['counts']))
+        {
+            $output->writeln(json_encode($result['counts'], JSON_UNESCAPED_SLASHES));
+        }
+        if ($result['status'] === 'not_pending')
+        {
+            $output->writeln('Only conversations selected by auto-prune can be purged. Review the ConvoPlus prune settings and run the normal selector to enter grace.');
+        }
+        else if ($result['status'] === 'not_due')
+        {
+            $output->writeln('The grace period expires at ' . gmdate('Y-m-d H:i:s', $result['purge_after']) . ' UTC.');
+        }
+        return in_array($result['status'], ['purged', 'would_purge'], true) ? 0 : 1;
     }
 }

@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Finder\\ConversationUserFinder",
+    "to_class": "HappyBoard\\ConvoPlus\\XF\\Finder\\ConversationUserFinder",
+    "execute_order": 10,
+    "active": true
+}
