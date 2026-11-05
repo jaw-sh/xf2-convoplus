@@ -45,9 +45,9 @@
         "hash": "aa76d047609bf7a04a428e5c3d95c2f0"
     },
     "public/hb_convo_conversation_view_macros.html": {
-        "version_id": 6,
-        "version_string": "2.3.0",
-        "hash": "63f24d3d7a7bcfc003f6f7844cc6d7de"
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "91067788dc34a6dbd091f154090614d8"
     },
     "public/hb_convo_force_join_confirm.html": {
         "version_id": 8,
@@ -58,6 +58,11 @@
         "version_id": 1,
         "version_string": "1.1.0",
         "hash": "b88301a1f9c9ce2e7101644d31c7948e"
+    },
+    "public/hb_convo_prune_exempt.html": {
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "73f7478e4f18f2944fdc9d048ae657db"
     },
     "public/hb_convo_pruned_report.html": {
         "version_id": 13,

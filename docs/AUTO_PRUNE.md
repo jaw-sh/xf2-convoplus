@@ -8,6 +8,18 @@ Removing Misc's duplicate and renaming the ConvoPlus cron prevents either class 
 
 Production cron owner, deployment revision, dry-run evidence, transition count/cap decision and first grace/purge cycle are UNMEASURED / NOT DEPLOYED in this implementation. No production acceptance is implied. Use the thread operations guide for the emergency stop, backups, serial integration lane and audit requirements. DM purge rechecks NCMEC recipient and message-author holds, incident content/attachments, litigation recipients and open message reports under a row lock. Restore clears the prune date, records restoration and stamps inactivity immunity.
 
+## Moderator exemptions (2.5.4)
+
+Permission `conversation.hbPruneExempt` (Direct message moderator permissions) lets a moderator exempt a DM from auto-prune permanently. `xf_conversation_master.hb_prune_exempt_until` stores it; `4294967295` means permanent, the same convention as GuestPosts threads. The tool is the public page `hb-convo-exempt/`: enter a DM ID and it shows only ID, dates, participant count and status (Exempt / Pending deletion / Subject to auto-prune). Pending and held both read "Pending deletion", so hold existence is not revealed. A moderator who is a participant also gets a button on the conversation page.
+
+- Exempting a DM that is pending or held restores it through the guarded `restore()` path (unread counts rebuilt, search reindexed). Holds still block purge independently; an exemption never overrides preservation.
+- The Selector skips exempt DMs (query and locked re-check). `refreshHolds()` and the Purger (under the row lock, including `xf-hb:destroy-conversation`) cancel any pending/held record whose DM is exempt, which clears the stamp.
+- Removing an exemption stamps `hb_prune_clock = now`, so the DM gets a full inactivity window rather than being selected on the next run.
+- Every change is an `exempt` row in `xf_hb_prune_log` with `{"exempt": true|false}` and the moderator's user ID. `xf-hb:prune-status` prints the exemption count.
+- The 2.5.4 upgrade converts any future `hb_prune_clock` (the pre-2.5.4 manual stopgap; restore and activity only ever stamp the current time) into a permanent exemption.
+
+The participant-facing "Scheduled deletion" date in the DM list is the date the DM disappears (last activity + `inactivity_days`), or "Exempt from deletion". Before 2.5.4 it showed the purge date (+ `grace_days`), so DMs vanished a week before the date members were shown (conversation 112040, 2026-10-30).
+
 ## Validation
 
 Use PHPUnit 10/11 in `xfdev` after the installed ConvoPlus and Misc migrations. The same disposable database and file precautions as GuestPosts apply. The exact database-name acknowledgement is mandatory for mutating integration tests.

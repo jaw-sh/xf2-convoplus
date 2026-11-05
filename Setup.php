@@ -45,6 +45,33 @@ class Setup extends AbstractSetup
             $this->installPruning();
             $this->db()->delete('xf_cron_entry', 'entry_id = ?', 'HBConverastionPrune');
         }
+
+        if ($this->addOn->version_id < 14)
+        {
+            $this->installPruning();
+            $this->convertFutureClocksToExemptions();
+        }
+    }
+
+    /**
+     * Before exemptions existed, staff protected a restored DM by pushing
+     * hb_prune_clock into the future (2026-11-05, conversation 112040). Restore
+     * and activity only ever stamp the current time, so any future clock is a
+     * manual stopgap: convert it to a permanent exemption with an audit row.
+     */
+    protected function convertFutureClocksToExemptions()
+    {
+        $db = $this->db();
+        $ids = $db->fetchAllColumn('SELECT conversation_id FROM xf_conversation_master
+            WHERE hb_prune_clock > ? AND hb_prune_exempt_until = 0', \XF::$time);
+        foreach ($ids AS $id)
+        {
+            $db->update('xf_conversation_master', [
+                'hb_prune_exempt_until' => \HappyBoard\ConvoPlus\Repository\Prune::PERMANENT_EXEMPTION,
+                'hb_prune_clock' => \XF::$time,
+            ], 'conversation_id = ?', $id);
+            (new \HappyBoard\Misc\AutoPrune\Audit($this->app))->log('conversation', (int)$id, 'exempt', ['exempt' => true]);
+        }
     }
 
     public function uninstall(array $stepParams = [])
@@ -93,7 +120,7 @@ class Setup extends AbstractSetup
         if ($schema->columnExists('xf_conversation_master', 'hb_pruned_date'))
         {
             $schema->alterTable('xf_conversation_master', function (Alter $table) {
-                $table->dropColumns(['hb_pruned_date', 'hb_prune_clock']);
+                $table->dropColumns(['hb_pruned_date', 'hb_prune_clock', 'hb_prune_exempt_until']);
             });
         }
         // Tombstones and the shared audit log survive uninstall.
@@ -110,6 +137,10 @@ class Setup extends AbstractSetup
             if (!$schema->columnExists('xf_conversation_master', 'hb_prune_clock'))
             {
                 $table->addColumn('hb_prune_clock', 'int')->unsigned()->setDefault(0);
+            }
+            if (!$schema->columnExists('xf_conversation_master', 'hb_prune_exempt_until'))
+            {
+                $table->addColumn('hb_prune_exempt_until', 'int')->unsigned()->setDefault(0);
             }
             if (!$this->db()->fetchRow("SHOW INDEX FROM xf_conversation_master WHERE Key_name = 'hb_prune_selection'"))
             {

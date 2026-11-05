@@ -5,5 +5,5 @@
     "enabled": true,
     "action": "str_replace",
     "find": "<xf:button href=\"{{ link('direct-messages/mark-unread'",
-    "replace": "<xf:macro id=\"hb_convo_conversation_view_macros::sleep_button\" arg-conversation=\"{$conversation}\" arg-userConv=\"{$userConv}\" />\n\n$0"
+    "replace": "<xf:macro id=\"hb_convo_conversation_view_macros::prune_exempt_button\" arg-conversation=\"{$conversation}\" />\n<xf:macro id=\"hb_convo_conversation_view_macros::sleep_button\" arg-conversation=\"{$conversation}\" arg-userConv=\"{$userConv}\" />\n\n$0"
 }

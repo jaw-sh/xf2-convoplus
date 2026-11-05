@@ -5,6 +5,7 @@
 Quotes your message in a direct message]]></phrase>
   <phrase title="hb_cannot_rejoin_kicked_conversation" version_id="3" version_string="2.1.0"><![CDATA[You are not permitted to rejoin this conversation because you were kicked from it.]]></phrase>
   <phrase title="hb_convo_already_participant_x" version_id="9" version_string="2.4.2"><![CDATA[You are already a participant in this direct message. <a href="{url}">Go to message</a>]]></phrase>
+  <phrase title="hb_convo_exempt_from_deletion" version_id="14" version_string="2.5.4"><![CDATA[Exempt from deletion]]></phrase>
   <phrase title="hb_convo_force_join" version_id="2" version_string="2.0.0"><![CDATA[Join Conversation]]></phrase>
   <phrase title="hb_convo_force_join_explain" version_id="8" version_string="2.4.1"><![CDATA[You will be able to read the entire message history and will receive new replies until you leave. This action is recorded in the moderator log.]]></phrase>
   <phrase title="hb_convo_force_join_report_not_open" version_id="9" version_string="2.4.2"><![CDATA[You can only join a direct message from a report that is open or assigned. Reopen the report first if you still need access.]]></phrase>
@@ -12,6 +13,16 @@ Quotes your message in a direct message]]></phrase>
   <phrase title="hb_convo_kicked_by_x" version_id="1" version_string="1.1.0"><![CDATA[Kicked by {user}]]></phrase>
   <phrase title="hb_convo_lives_until_x" version_id="1" version_string="2.5.0"><![CDATA[Scheduled deletion {lifespan}]]></phrase>
   <phrase title="hb_convo_please_confirm_that_you_want_to_force_join" version_id="8" version_string="2.4.1"><![CDATA[Please confirm that you want to join the following direct message as a participant]]></phrase>
+  <phrase title="hb_convo_prune_exempt_add" version_id="14" version_string="2.5.4"><![CDATA[Exempt from auto-prune]]></phrase>
+  <phrase title="hb_convo_prune_exempt_busy" version_id="14" version_string="2.5.4"><![CDATA[Auto-prune is busy. Please try again in a moment.]]></phrase>
+  <phrase title="hb_convo_prune_exempt_explain" version_id="14" version_string="2.5.4"><![CDATA[Look up a direct message by ID. Only metadata is shown. Exempt direct messages are never auto-pruned. Exempting one that is pending deletion restores it for its participants.]]></phrase>
+  <phrase title="hb_convo_prune_exempt_not_found" version_id="14" version_string="2.5.4"><![CDATA[No direct message with this ID exists.]]></phrase>
+  <phrase title="hb_convo_prune_exempt_remove" version_id="14" version_string="2.5.4"><![CDATA[Remove auto-prune exemption]]></phrase>
+  <phrase title="hb_convo_prune_exempt_restore_add" version_id="14" version_string="2.5.4"><![CDATA[Restore and exempt from auto-prune]]></phrase>
+  <phrase title="hb_convo_prune_exempt_status_exempt" version_id="14" version_string="2.5.4"><![CDATA[Exempt from auto-prune]]></phrase>
+  <phrase title="hb_convo_prune_exempt_status_normal" version_id="14" version_string="2.5.4"><![CDATA[Subject to auto-prune]]></phrase>
+  <phrase title="hb_convo_prune_exempt_title" version_id="14" version_string="2.5.4"><![CDATA[Direct message auto-prune exemption]]></phrase>
+  <phrase title="hb_convo_prune_exempt_updated" version_id="14" version_string="2.5.4"><![CDATA[Auto-prune exemption updated.]]></phrase>
   <phrase title="hb_convo_x_other_participants" version_id="6" version_string="2.3.0"><![CDATA[{count} other participants]]></phrase>
   <phrase title="hb_direct_message_awake" version_id="2" version_string="2.0.0"><![CDATA[Awake to new messages in this chain.]]></phrase>
   <phrase title="hb_direct_message_sleeping" version_id="2" version_string="2.0.0"><![CDATA[Sleeping on new direct messages.]]></phrase>
@@ -26,6 +37,7 @@ Quotes your message in a direct message]]></phrase>
   <phrase title="hb_wake" version_id="2" version_string="2.0.0"><![CDATA[Wake]]></phrase>
   <phrase title="hb_x_kicked_you_from_direct_message_y" version_id="2" version_string="2.0.0"><![CDATA[{name} kicked you from the direct message chain {title}.]]></phrase>
   <phrase title="mod_log.conversation_force_join" version_id="8" version_string="2.4.1"><![CDATA[Force-joined via report #{report_id} (previous state: {previous_state})]]></phrase>
+  <phrase title="permission.conversation_hbPruneExempt" version_id="14" version_string="2.5.4"><![CDATA[Exempt direct messages from auto-prune]]></phrase>
   <phrase title="x_mentioned_you_in_message_in_direct_message_y" version_id="3" version_string="2.1.0"><![CDATA[{name} mentioned you in a message in the direct message {title}.]]></phrase>
   <phrase title="x_quoted_your_message_in_direct_message_y" version_id="3" version_string="2.1.0"><![CDATA[{name} quoted your message in the direct message {title}.]]></phrase>
   <phrase title="admin_permission.hbConvoPrune" version_id="10" version_string="2.5.0"><![CDATA[Manage direct message auto-prune]]></phrase>

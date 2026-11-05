@@ -110,6 +110,14 @@
 	</xf:if>
 </xf:macro>
 
+<xf:macro id="prune_exempt_button" arg-conversation="!">
+	<xf:if is="$conversation.canHbPruneExempt()">
+		<xf:button href="{{ link('hb-convo-exempt', null, {'conversation_id': $conversation.conversation_id, 'redirect': 'conversation'}) }}" class="button--link">
+			{{ $conversation.isHbPruneExempt() ? phrase('hb_convo_prune_exempt_remove') : phrase('hb_convo_prune_exempt_add') }}
+		</xf:button>
+	</xf:if>
+</xf:macro>
+
 <xf:macro id="sleep_button" arg-conversation="!" arg-userConv="!">
 	<xf:button href="{{ link('direct-messages/sleep', $conversation) }}" class="button--link"
 			   data-xf-click="switch"

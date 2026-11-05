@@ -1,0 +1,34 @@
+<xf:title>{{ phrase('hb_convo_prune_exempt_title') }}</xf:title>
+<div class="blockMessage">{{ phrase('hb_convo_prune_exempt_explain') }}</div>
+<xf:form action="{{ link('hb-convo-exempt') }}" method="get" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:numberboxrow name="conversation_id" value="{{ $conversationId ?: '' }}" min="1" label="{{ phrase('hb_convo_prune_id') }}" />
+		</div>
+		<xf:submitrow submit="{{ phrase('search') }}" />
+	</div>
+</xf:form>
+<xf:if is="$metadata">
+	<xf:form action="{{ link('hb-convo-exempt/save') }}" class="block">
+		<div class="block-container">
+			<div class="block-body">
+				<xf:formrow label="{{ phrase('hb_convo_prune_id') }}">{$metadata.conversation_id}</xf:formrow>
+				<xf:formrow label="{{ phrase('hb_convo_prune_start_date') }}">{{ date_time($metadata.start_date) }}</xf:formrow>
+				<xf:formrow label="{{ phrase('hb_convo_prune_last_date') }}"><xf:if is="$metadata.last_message_date">{{ date_time($metadata.last_message_date) }}</xf:if></xf:formrow>
+				<xf:formrow label="{{ phrase('hb_convo_prune_participant_count') }}">{$metadata.recipient_count}</xf:formrow>
+				<xf:formrow label="{{ phrase('status') }}">
+					<xf:if is="$metadata.exempt">{{ phrase('hb_convo_prune_exempt_status_exempt') }}
+					<xf:elseif is="$metadata.pending_deletion" />{{ phrase('hb_convo_prune_pending_deletion') }}
+					<xf:else />{{ phrase('hb_convo_prune_exempt_status_normal') }}
+					</xf:if>
+				</xf:formrow>
+				<xf:hiddenval name="conversation_id">{$metadata.conversation_id}</xf:hiddenval>
+				<xf:hiddenval name="exempt">{{ $metadata.exempt ? 0 : 1 }}</xf:hiddenval>
+				<xf:hiddenval name="redirect">{$redirect}</xf:hiddenval>
+			</div>
+			<xf:submitrow submit="{{ $metadata.exempt ? phrase('hb_convo_prune_exempt_remove') : ($metadata.pending_deletion ? phrase('hb_convo_prune_exempt_restore_add') : phrase('hb_convo_prune_exempt_add')) }}" />
+		</div>
+	</xf:form>
+<xf:elseif is="$conversationId" />
+	<div class="blockMessage">{{ phrase('hb_convo_prune_exempt_not_found') }}</div>
+</xf:if>

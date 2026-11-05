@@ -5,5 +5,5 @@
     "enabled": true,
     "action": "str_replace",
     "find": "<li class=\"structItem-startDate\"><a href=\"{{ link('direct-messages', $userConv) }}\" rel=\"nofollow\"><xf:date time=\"{$userConv.Master.start_date}\" /></a></li>",
-    "replace": "$0\n<li class=\"structItem-cutoffDate\">{{ phrase('hb_convo_lives_until_x', {'lifespan': date($userConv->Master->getLifespan()) }) }}</li>"
+    "replace": "$0\n<li class=\"structItem-cutoffDate\"><xf:if is=\"$userConv.Master.isHbPruneExempt()\">{{ phrase('hb_convo_exempt_from_deletion') }}<xf:else />{{ phrase('hb_convo_lives_until_x', {'lifespan': date($userConv->Master->getLifespan()) }) }}</xf:if></li>"
 }

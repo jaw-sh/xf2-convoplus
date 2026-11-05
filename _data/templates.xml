@@ -34,7 +34,7 @@
 
 	<xf:redirect />
 </xf:form>]]></template>
-  <template type="public" title="hb_convo_conversation_view_macros" version_id="6" version_string="2.3.0"><![CDATA[<xf:macro id="recipient" arg-recipient="!" arg-conversation="!">
+  <template type="public" title="hb_convo_conversation_view_macros" version_id="14" version_string="2.5.4"><![CDATA[<xf:macro id="recipient" arg-recipient="!" arg-conversation="!">
 	<xf:if is="$recipient.User">
 		<div class="contentRow-figure">
 			<xf:avatar user="$recipient.User" size="xs" />
@@ -146,6 +146,14 @@
 	</xf:if>
 </xf:macro>
 
+<xf:macro id="prune_exempt_button" arg-conversation="!">
+	<xf:if is="$conversation.canHbPruneExempt()">
+		<xf:button href="{{ link('hb-convo-exempt', null, {'conversation_id': $conversation.conversation_id, 'redirect': 'conversation'}) }}" class="button--link">
+			{{ $conversation.isHbPruneExempt() ? phrase('hb_convo_prune_exempt_remove') : phrase('hb_convo_prune_exempt_add') }}
+		</xf:button>
+	</xf:if>
+</xf:macro>
+
 <xf:macro id="sleep_button" arg-conversation="!" arg-userConv="!">
 	<xf:button href="{{ link('direct-messages/sleep', $conversation) }}" class="button--link"
 			   data-xf-click="switch"
@@ -194,6 +202,41 @@
 		<xf:submitrow icon="confirm" rowtype="simple" />
 	</div>
 </xf:form>]]></template>
+  <template type="public" title="hb_convo_prune_exempt" version_id="14" version_string="2.5.4"><![CDATA[<xf:title>{{ phrase('hb_convo_prune_exempt_title') }}</xf:title>
+<div class="blockMessage">{{ phrase('hb_convo_prune_exempt_explain') }}</div>
+<xf:form action="{{ link('hb-convo-exempt') }}" method="get" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:numberboxrow name="conversation_id" value="{{ $conversationId ?: '' }}" min="1" label="{{ phrase('hb_convo_prune_id') }}" />
+		</div>
+		<xf:submitrow submit="{{ phrase('search') }}" />
+	</div>
+</xf:form>
+<xf:if is="$metadata">
+	<xf:form action="{{ link('hb-convo-exempt/save') }}" class="block">
+		<div class="block-container">
+			<div class="block-body">
+				<xf:formrow label="{{ phrase('hb_convo_prune_id') }}">{$metadata.conversation_id}</xf:formrow>
+				<xf:formrow label="{{ phrase('hb_convo_prune_start_date') }}">{{ date_time($metadata.start_date) }}</xf:formrow>
+				<xf:formrow label="{{ phrase('hb_convo_prune_last_date') }}"><xf:if is="$metadata.last_message_date">{{ date_time($metadata.last_message_date) }}</xf:if></xf:formrow>
+				<xf:formrow label="{{ phrase('hb_convo_prune_participant_count') }}">{$metadata.recipient_count}</xf:formrow>
+				<xf:formrow label="{{ phrase('status') }}">
+					<xf:if is="$metadata.exempt">{{ phrase('hb_convo_prune_exempt_status_exempt') }}
+					<xf:elseif is="$metadata.pending_deletion" />{{ phrase('hb_convo_prune_pending_deletion') }}
+					<xf:else />{{ phrase('hb_convo_prune_exempt_status_normal') }}
+					</xf:if>
+				</xf:formrow>
+				<xf:hiddenval name="conversation_id">{$metadata.conversation_id}</xf:hiddenval>
+				<xf:hiddenval name="exempt">{{ $metadata.exempt ? 0 : 1 }}</xf:hiddenval>
+				<xf:hiddenval name="redirect">{$redirect}</xf:hiddenval>
+			</div>
+			<xf:submitrow submit="{{ $metadata.exempt ? phrase('hb_convo_prune_exempt_remove') : ($metadata.pending_deletion ? phrase('hb_convo_prune_exempt_restore_add') : phrase('hb_convo_prune_exempt_add')) }}" />
+		</div>
+	</xf:form>
+<xf:elseif is="$conversationId" />
+	<div class="blockMessage">{{ phrase('hb_convo_prune_exempt_not_found') }}</div>
+</xf:if>
+]]></template>
   <template type="public" title="hb_convo_rejoin_confirm" version_id="8" version_string="2.4.1"><![CDATA[<xf:title>{{ phrase('hb_rejoin') }}</xf:title>
 
 <xf:breadcrumb href="{{ link('direct-messages') }}">{{ phrase('direct_messages') }}</xf:breadcrumb>

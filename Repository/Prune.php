@@ -10,6 +10,14 @@ use XF\Mvc\Entity\Repository;
 
 class Prune extends Repository
 {
+    /** Matches GuestPosts threads: the maximum UINT is a permanent, moderator-managed exemption. */
+    public const PERMANENT_EXEMPTION = 4294967295;
+
+    public static function isExemptValue($exemptUntil): bool
+    {
+        return (int)$exemptUntil >= \XF::$time;
+    }
+
     public function getConfig(): array
     {
         return (new Policy($this->app()))->conversationConfig();
@@ -43,6 +51,106 @@ class Prune extends Repository
             LEFT JOIN xf_conversation_master AS c ON (c.conversation_id = p.conversation_id)
             WHERE p.conversation_id = ?
         ', $conversationId) ?: null;
+    }
+
+    /**
+     * Moderator-facing metadata for any existing conversation, pruned or not.
+     * Deliberately never selects titles, messages, recipient names or IDs, and
+     * collapses pending/held so hold existence is not revealed.
+     */
+    public function exemptionMetadata(int $conversationId): ?array
+    {
+        $row = $this->db()->fetchRow('
+            SELECT c.conversation_id, c.start_date, c.last_message_date, c.recipient_count,
+                c.hb_pruned_date, c.hb_prune_exempt_until, p.state
+            FROM xf_conversation_master AS c
+            LEFT JOIN xf_hb_convo_prune AS p ON (p.conversation_id = c.conversation_id)
+            WHERE c.conversation_id = ?
+        ', $conversationId);
+        if (!$row)
+        {
+            return null;
+        }
+        $pending = (int)$row['hb_pruned_date'] > 0 && in_array($row['state'], ['pending', 'held'], true);
+        return [
+            'conversation_id' => (int)$row['conversation_id'],
+            'start_date' => (int)$row['start_date'],
+            'last_message_date' => (int)$row['last_message_date'],
+            'recipient_count' => (int)$row['recipient_count'],
+            'pending_deletion' => $pending,
+            'exempt' => self::isExemptValue($row['hb_prune_exempt_until']),
+        ];
+    }
+
+    /**
+     * Sets or clears the permanent exemption. Exempting a conversation that is
+     * pending deletion (or held) also restores it, through the same guarded
+     * restore path the ACP uses. Returns null when the lock is busy.
+     */
+    public function setExempt(int $conversationId, bool $exempt, int $userId = 0): ?bool
+    {
+        $result = (new Lock($this->db()))->run('hbConvoPrune', function () use ($conversationId, $exempt, $userId) {
+            $db = $this->db();
+            $db->beginTransaction();
+            try
+            {
+                $master = $db->fetchRow('SELECT conversation_id, hb_pruned_date, hb_prune_exempt_until
+                    FROM xf_conversation_master WHERE conversation_id = ? FOR UPDATE', $conversationId);
+                if (!$master)
+                {
+                    $db->rollback();
+                    return false;
+                }
+                $value = $exempt ? self::PERMANENT_EXEMPTION : 0;
+                $changed = (int)$master['hb_prune_exempt_until'] !== $value;
+                if ($changed)
+                {
+                    $values = ['hb_prune_exempt_until' => $value];
+                    if (!$exempt)
+                    {
+                        // Removing an exemption starts a fresh inactivity window rather than
+                        // making a long-quiet conversation eligible on the very next run.
+                        $values['hb_prune_clock'] = \XF::$time;
+                    }
+                    $db->update('xf_conversation_master', $values, 'conversation_id = ?', $conversationId);
+                    (new Audit($this->app()))->log('conversation', $conversationId, 'exempt', ['exempt' => $exempt], $userId);
+                }
+                $db->commit();
+            }
+            catch (\Throwable $e)
+            {
+                $db->rollback();
+                throw $e;
+            }
+
+            $restored = false;
+            if ($exempt && (int)$master['hb_pruned_date'] > 0)
+            {
+                $record = $this->findRecord($conversationId);
+                if ($record && in_array($record['state'], ['pending', 'held'], true))
+                {
+                    $restored = $this->restore($conversationId, $userId);
+                }
+                if (!$restored)
+                {
+                    // A stale or unowned stamp: cancelling clears it and rescues the intact conversation.
+                    $this->cancel($conversationId, 'exempt');
+                }
+            }
+
+            $entity = $this->em->findCached('XF:ConversationMaster', $conversationId);
+            if ($entity)
+            {
+                $this->em->detachEntity($entity);
+            }
+            return true;
+        });
+        return $result === null ? null : (bool)$result;
+    }
+
+    public function countExempt(): int
+    {
+        return (int)$this->db()->fetchOne('SELECT COUNT(*) FROM xf_conversation_master WHERE hb_prune_exempt_until >= ?', \XF::$time);
     }
 
     public function queue(int $limit = 250): array
@@ -256,7 +364,7 @@ class Prune extends Repository
                         $db->rollback();
                         break;
                     }
-                    $master = $db->fetchRow('SELECT conversation_id, hb_pruned_date, start_date, last_message_date, hb_prune_clock
+                    $master = $db->fetchRow('SELECT conversation_id, hb_pruned_date, start_date, last_message_date, hb_prune_clock, hb_prune_exempt_until
                         FROM xf_conversation_master WHERE conversation_id = ? FOR UPDATE', $id);
                     $record = $db->fetchRow('SELECT * FROM xf_hb_convo_prune WHERE conversation_id = ? FOR UPDATE', $id);
                     if (!$record || !in_array($record['state'], ['pending', 'held', 'cancelled'], true))
@@ -277,6 +385,12 @@ class Prune extends Repository
                     else if (!$master || (int)$master['hb_pruned_date'] !== (int)$record['pruned_date'] || !(int)$record['pruned_date'])
                     {
                         $this->cancel($id, 'prune_stamp_changed');
+                        $changed++;
+                    }
+                    else if (self::isExemptValue($master['hb_prune_exempt_until']))
+                    {
+                        // An exemption set after selection (e.g. by raw SQL) still wins before purge.
+                        $this->cancel($id, 'exempt');
                         $changed++;
                     }
                     else if ($activityClock >= $cutoff || $activityClock >= (int)$record['pruned_date'])

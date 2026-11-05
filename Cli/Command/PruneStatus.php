@@ -74,6 +74,10 @@ class PruneStatus extends Command
         $config = $policy->conversationConfig();
         $output->writeln('Conversation mode: ' . $config['mode']);
         $output->writeln('Conversation breaker: ' . ($config['tripped_date'] ? gmdate('Y-m-d H:i:s', $config['tripped_date']) . ' UTC' : 'clear'));
+        if ($db->getSchemaManager()->columnExists('xf_conversation_master', 'hb_prune_exempt_until'))
+        {
+            $output->writeln('Conversation exemptions: ' . $app->repository('HappyBoard\ConvoPlus:Prune')->countExempt());
+        }
         $this->writeCleanupStatus($output);
         return 0;
     }

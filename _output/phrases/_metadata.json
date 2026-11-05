@@ -41,6 +41,12 @@
         "version_string": "2.4.2",
         "hash": "332a96b11a696ae3134d8cab698cafee"
     },
+    "hb_convo_exempt_from_deletion.txt": {
+        "global_cache": false,
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "65c0665ed48168f724d2a2917fa73c45"
+    },
     "hb_convo_force_join.txt": {
         "global_cache": false,
         "version_id": 2,
@@ -124,6 +130,66 @@
         "version_id": 10,
         "version_string": "2.5.0",
         "hash": "f65702dc392c69812b82d933aa733fcf"
+    },
+    "hb_convo_prune_exempt_add.txt": {
+        "global_cache": false,
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "7780fdf052d8761cdce9f5c4fa82cad6"
+    },
+    "hb_convo_prune_exempt_busy.txt": {
+        "global_cache": false,
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "daef039946ceb1e4fe806e6f142f3f58"
+    },
+    "hb_convo_prune_exempt_explain.txt": {
+        "global_cache": false,
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "cdfe5d2b7e59362b7ca0443180f66eb6"
+    },
+    "hb_convo_prune_exempt_not_found.txt": {
+        "global_cache": false,
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "835842478deaf7a27db455950778be8e"
+    },
+    "hb_convo_prune_exempt_remove.txt": {
+        "global_cache": false,
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "8195f86bd8b55826b809d5eb79f9113e"
+    },
+    "hb_convo_prune_exempt_restore_add.txt": {
+        "global_cache": false,
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "4725e186b4d5d71901c2d3401612b2aa"
+    },
+    "hb_convo_prune_exempt_status_exempt.txt": {
+        "global_cache": false,
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "7780fdf052d8761cdce9f5c4fa82cad6"
+    },
+    "hb_convo_prune_exempt_status_normal.txt": {
+        "global_cache": false,
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "0f9f5502699ac9074c9f664ccf0e45ec"
+    },
+    "hb_convo_prune_exempt_title.txt": {
+        "global_cache": false,
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "519b9adcf43dc3225f0c3226148b0f2a"
+    },
+    "hb_convo_prune_exempt_updated.txt": {
+        "global_cache": false,
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "71da1fdd1f925cb22574b8aed39ee448"
     },
     "hb_convo_prune_grace_days.txt": {
         "global_cache": false,
@@ -436,6 +502,12 @@
         "version_id": 8,
         "version_string": "2.4.1",
         "hash": "9061d8105a2bbf03b723377002bd3bd7"
+    },
+    "permission.conversation_hbPruneExempt.txt": {
+        "global_cache": false,
+        "version_id": 14,
+        "version_string": "2.5.4",
+        "hash": "663f36e5260b6501080eead040ff1982"
     },
     "x_mentioned_you_in_message_in_direct_message_y.txt": {
         "global_cache": false,

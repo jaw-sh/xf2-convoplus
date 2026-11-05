@@ -1,0 +1,1 @@
+Look up a direct message by ID. Only metadata is shown. Exempt direct messages are never auto-pruned. Exempting one that is pending deletion restores it for its participants.

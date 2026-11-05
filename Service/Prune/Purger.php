@@ -36,8 +36,9 @@ class Purger extends AbstractService
                 WHERE p.state = 'pending' AND p.purge_after <= ?
                     AND p.pruned_date > 0 AND p.pruned_date = c.hb_pruned_date
                     AND GREATEST(c.start_date, c.last_message_date, c.hb_prune_clock) < ?
+                    AND c.hb_prune_exempt_until < ?
                 ORDER BY p.purge_after, p.conversation_id LIMIT {$limit}
-            ", [\XF::$time, \XF::$time - $config['inactivity_days'] * 86400]));
+            ", [\XF::$time, \XF::$time - $config['inactivity_days'] * 86400, \XF::$time]));
             if (Policy::exceedsCap(count($ids), 0, $this->purgedToday(), $config['max_per_run'], $config['max_per_day']))
             {
                 $repo->trip('purge_cap', count($ids));
@@ -92,7 +93,7 @@ class Purger extends AbstractService
         $db->beginTransaction();
         try
         {
-            $master = $db->fetchRow('SELECT conversation_id, hb_pruned_date, start_date, last_message_date, hb_prune_clock
+            $master = $db->fetchRow('SELECT conversation_id, hb_pruned_date, start_date, last_message_date, hb_prune_clock, hb_prune_exempt_until
                 FROM xf_conversation_master WHERE conversation_id = ? FOR UPDATE', $conversationId);
             $record = $db->fetchRow('SELECT * FROM xf_hb_convo_prune WHERE conversation_id = ? FOR UPDATE', $conversationId);
             if (!$record || !in_array($record['state'], ['pending', 'held'], true))
@@ -112,6 +113,20 @@ class Purger extends AbstractService
                     $db->rollback();
                 }
                 return ['status' => 'cancelled', 'reason' => 'prune_stamp_changed'];
+            }
+            if (\HappyBoard\ConvoPlus\Repository\Prune::isExemptValue($master['hb_prune_exempt_until']))
+            {
+                // A moderator exemption always wins over deletion, including the manual destroy command.
+                if (!$dryRun)
+                {
+                    $repo->cancel($conversationId, 'exempt');
+                    $db->commit();
+                }
+                else
+                {
+                    $db->rollback();
+                }
+                return ['status' => 'cancelled', 'reason' => 'exempt'];
             }
             $activityClock = max((int)$master['start_date'], (int)$master['last_message_date'], (int)$master['hb_prune_clock']);
             $activityReason = $activityClock >= \XF::$time - $config['inactivity_days'] * 86400

@@ -7,11 +7,31 @@ use XF\Mvc\Entity\Structure;
 
 class ConversationMaster extends XFCP_ConversationMaster
 {
+    /**
+     * When the conversation disappears for its participants (auto-pruned and
+     * unreadable). The later purge date is staff-only; showing it here made
+     * DMs look deleted "early" (see docs/AUTO_PRUNE.md). 0 when exempt.
+     */
     public function getLifespan()
     {
+        if ($this->isHbPruneExempt())
+        {
+            return 0;
+        }
         $config = $this->repository('HappyBoard\\ConvoPlus:Prune')->getConfig();
         return max($this->start_date, $this->last_message_date, $this->hb_prune_clock)
-            + ($config['inactivity_days'] + $config['grace_days']) * 86400;
+            + $config['inactivity_days'] * 86400;
+    }
+
+    public function isHbPruneExempt(): bool
+    {
+        return \HappyBoard\ConvoPlus\Repository\Prune::isExemptValue($this->hb_prune_exempt_until);
+    }
+
+    public function canHbPruneExempt(): bool
+    {
+        $visitor = \XF::visitor();
+        return $visitor->user_id && $visitor->hasPermission('conversation', 'hbPruneExempt');
     }
 
     public function isAutoPruned(): bool
@@ -69,6 +89,7 @@ class ConversationMaster extends XFCP_ConversationMaster
         $structure->getters[] = 'lifespan';
         $structure->columns['hb_pruned_date'] = ['type' => Entity::UINT, 'default' => 0];
         $structure->columns['hb_prune_clock'] = ['type' => Entity::UINT, 'default' => 0];
+        $structure->columns['hb_prune_exempt_until'] = ['type' => Entity::UINT, 'default' => 0];
 
         return $structure;
     }

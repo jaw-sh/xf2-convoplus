@@ -55,9 +55,10 @@ class Selector extends AbstractService
                 LEFT JOIN xf_hb_convo_prune AS p ON (p.conversation_id = c.conversation_id)
                 WHERE c.conversation_id > ? AND c.hb_pruned_date = 0
                     AND GREATEST(c.start_date, c.last_message_date, c.hb_prune_clock) < ?
+                    AND c.hb_prune_exempt_until < ?
                     AND (p.state IS NULL OR p.state IN ('restored', 'cancelled'))
                 ORDER BY c.conversation_id LIMIT 100
-            ", [$lastId, $cutoff]);
+            ", [$lastId, $cutoff, \XF::$time]);
             foreach ($batch AS $candidate)
             {
                 $lastId = (int)$candidate['conversation_id'];
@@ -119,6 +120,7 @@ class Selector extends AbstractService
                     break;
                 }
                 if (!$master || (int)$master['hb_pruned_date']
+                    || \HappyBoard\ConvoPlus\Repository\Prune::isExemptValue($master['hb_prune_exempt_until'] ?? 0)
                     || max((int)$master['start_date'], (int)$master['last_message_date'], (int)$master['hb_prune_clock']) >= \XF::$time - $currentConfig['inactivity_days'] * 86400)
                 {
                     $this->db()->rollback();

@@ -1,5 +1,8 @@
 {
     "admin_hb-convo-prune_.json": {
         "hash": "abd58b9a563172f83932cb0c40d19f14"
+    },
+    "public_hb-convo-exempt_.json": {
+        "hash": "349458e6730c6a7a3ad335c22c584f61"
     }
 }

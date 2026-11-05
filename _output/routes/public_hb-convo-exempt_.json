@@ -1,0 +1,11 @@
+{
+    "route_type": "public",
+    "route_prefix": "hb-convo-exempt",
+    "sub_name": "",
+    "format": "",
+    "build_class": "",
+    "build_method": "",
+    "controller": "HappyBoard\\ConvoPlus:PruneExempt",
+    "context": "",
+    "action_prefix": ""
+}

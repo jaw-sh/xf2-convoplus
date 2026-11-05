@@ -3,7 +3,7 @@
   <modification type="public" template="conversation_list_macros" modification_key="hb_convo_conversation_list_macros" description="Adds the autodeletion timer to the list." execution_order="10" enabled="1" action="str_replace">
     <find><![CDATA[<li class="structItem-startDate"><a href="{{ link('direct-messages', $userConv) }}" rel="nofollow"><xf:date time="{$userConv.Master.start_date}" /></a></li>]]></find>
     <replace><![CDATA[$0
-<li class="structItem-cutoffDate">{{ phrase('hb_convo_lives_until_x', {'lifespan': date($userConv->Master->getLifespan()) }) }}</li>]]></replace>
+<li class="structItem-cutoffDate"><xf:if is="$userConv.Master.isHbPruneExempt()">{{ phrase('hb_convo_exempt_from_deletion') }}<xf:else />{{ phrase('hb_convo_lives_until_x', {'lifespan': date($userConv->Master->getLifespan()) }) }}</xf:if></li>]]></replace>
   </modification>
   <modification type="public" template="conversation_list_macros" modification_key="hb_convo_conversation_list_macros_participants" description="Removes excessive user lists." execution_order="10" enabled="1" action="preg_replace">
     <find><![CDATA[/<ul[^>]*listInline[^>]*>.*?<\/ul>/s]]></find>
@@ -19,7 +19,8 @@
   </modification>
   <modification type="public" template="conversation_view" modification_key="hb_convo_conversation_view_sleep_button" description="Inserts the sleep/wake button." execution_order="10" enabled="1" action="str_replace">
     <find><![CDATA[<xf:button href="{{ link('direct-messages/mark-unread']]></find>
-    <replace><![CDATA[<xf:macro id="hb_convo_conversation_view_macros::sleep_button" arg-conversation="{$conversation}" arg-userConv="{$userConv}" />
+    <replace><![CDATA[<xf:macro id="hb_convo_conversation_view_macros::prune_exempt_button" arg-conversation="{$conversation}" />
+<xf:macro id="hb_convo_conversation_view_macros::sleep_button" arg-conversation="{$conversation}" arg-userConv="{$userConv}" />
 
 $0]]></replace>
   </modification>
